@@ -1,41 +1,27 @@
 "use client";
 
-import { useState, useEffect } from "react";
-
-interface Album {
-  id: string;
-  title: string;
-  artist: string;
-  year?: number;
-}
+import { useGetAlbumsQuery } from "../store/api";
+import { useDispatch } from "react-redux";
+import { setAlbums } from "../store/albums/albumsSlice";
+import { useEffect } from "react";
 
 export const useAlbums = () => {
-  const [albums, setAlbums] = useState<Album[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const dispatch = useDispatch();
+  const { data: albums = [], isLoading: loading, error } = useGetAlbumsQuery();
 
   useEffect(() => {
-    const apiUrl =
-      process.env.NEXT_PUBLIC_API_URL || "YOUR_API_GATEWAY_URL_HERE";
-    fetch(`${apiUrl}/albums`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
-      mode: 'cors',
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        setAlbums(data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error('Fetch error:', err);
-        setError(err.message);
-        setLoading(false);
-      });
-  }, []);
+    if (albums.length > 0) {
+      dispatch(setAlbums(albums));
+    }
+  }, [albums, dispatch]);
 
-  return { albums, loading, error };
+  return {
+    albums,
+    loading,
+    error: error
+      ? "message" in error
+        ? error.message
+        : "An error occurred"
+      : null,
+  };
 };
