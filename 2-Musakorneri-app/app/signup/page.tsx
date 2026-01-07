@@ -24,7 +24,31 @@ export default function SignUp() {
   const handleConfirm = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await confirmSignUp(email, confirmationCode);
+      const result = await confirmSignUp(email, confirmationCode);
+      
+      // Create user in your database after successful confirmation
+      if (result.UserSub) {
+        try {
+          const response = await fetch('/api/users', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              id: result.UserSub,
+              username: email,
+              email: email,
+            }),
+          });
+          
+          if (!response.ok) {
+            console.error('Failed to create user in database');
+          }
+        } catch (dbError) {
+          console.error('Error creating user in database:', dbError);
+        }
+      }
+      
       setMessage("Account confirmed! You can now login");
     } catch (error: any) {
       setMessage(error.message);

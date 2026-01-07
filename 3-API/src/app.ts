@@ -5,11 +5,13 @@ import serverless from "serverless-http";
 import albumsRouter from "./routes/albums";
 import artistsRouter from "./routes/artists";
 import usersRouter from "./routes/users";
+import cors from "@koa/cors";
 
 const app = new Koa();
 const router = new Router();
 
 app.use(bodyParser());
+app.use(cors());
 
 // Routes
 router.use("/albums", albumsRouter.routes());

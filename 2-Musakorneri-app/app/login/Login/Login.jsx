@@ -15,7 +15,10 @@ export const Login = () => {
       if (result.AuthenticationResult) {
         setMessage("Login successful!");
         // Store token and redirect
-        localStorage.setItem("accessToken", result.AuthenticationResult.AccessToken);
+        localStorage.setItem(
+          "accessToken",
+          result.AuthenticationResult.AccessToken
+        );
         window.location.href = "/";
       }
     } catch (error) {
@@ -25,8 +28,13 @@ export const Login = () => {
 
   return (
     <div className="flex min-h-screen items-center justify-center">
-      <form onSubmit={handleLogin} className="w-full max-w-md space-y-4 p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md">
-        <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white">Login</h2>
+      <form
+        onSubmit={handleLogin}
+        className="w-full max-w-md space-y-4 p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md"
+      >
+        <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white">
+          Login
+        </h2>
         <div>
           <input
             type="email"
@@ -53,10 +61,17 @@ export const Login = () => {
         >
           Login
         </button>
-        {message && <p className="text-center text-sm text-gray-600 dark:text-gray-400">{message}</p>}
+        {message && (
+          <p className="text-center text-sm text-gray-600 dark:text-gray-400">
+            {message}
+          </p>
+        )}
         <p className="text-center text-sm text-gray-600 dark:text-gray-400">
-          Don't have an account?{" "}
-          <a href="/signup" className="text-blue-600 hover:text-blue-700 dark:text-blue-400">
+          {"Don't have an account?"}
+          <a
+            href="/signup"
+            className="text-blue-600 hover:text-blue-700 dark:text-blue-400"
+          >
             Sign up here
           </a>
         </p>

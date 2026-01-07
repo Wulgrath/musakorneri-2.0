@@ -1,0 +1,72 @@
+import * as cdk from "aws-cdk-lib/core";
+import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
+import * as lambda from "aws-cdk-lib/aws-lambda";
+import * as apigatewayv2 from "aws-cdk-lib/aws-apigatewayv2";
+import * as integrations from "aws-cdk-lib/aws-apigatewayv2-integrations";
+import { Construct } from "constructs";
+
+export class ApiStack extends cdk.Stack {
+  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
+    super(scope, id, props);
+
+    // Import tables from DynamoDB stack
+    const albumsTable = dynamodb.Table.fromTableArn(
+      this,
+      "ImportedAlbumsTable",
+      cdk.Fn.importValue("MusakorneriAlbumsTableArn")
+    );
+
+    const artistsTable = dynamodb.Table.fromTableArn(
+      this,
+      "ImportedArtistsTable",
+      cdk.Fn.importValue("MusakorneriArtistsTableArn")
+    );
+
+    const usersTable = dynamodb.Table.fromTableArn(
+      this,
+      "ImportedUsersTable",
+      cdk.Fn.importValue("MusakorneriUsersTableArn")
+    );
+
+    // Single Koa API Lambda
+    const apiLambda = new lambda.Function(this, "MusakorneriApiFunction", {
+      runtime: lambda.Runtime.NODEJS_24_X,
+      handler: "dist/app.handler",
+      code: lambda.Code.fromAsset("../3-API"),
+      timeout: cdk.Duration.seconds(30),
+    });
+
+    albumsTable.grantReadWriteData(apiLambda);
+    artistsTable.grantReadWriteData(apiLambda);
+    usersTable.grantReadWriteData(apiLambda);
+
+    const api = new apigatewayv2.HttpApi(this, "MusakorneriApi", {
+      apiName: "Musakorneri API",
+      corsPreflight: {
+        allowOrigins: ["https://musakorneri.in", "http://localhost:3000"],
+        allowMethods: [apigatewayv2.CorsHttpMethod.ANY],
+        allowHeaders: [
+          "Content-Type",
+          "Authorization",
+          "Accept",
+          "X-Requested-With",
+        ],
+      },
+    });
+
+    // Add Lambda integration
+    api.addRoutes({
+      path: "/{proxy+}",
+      methods: [apigatewayv2.HttpMethod.ANY],
+      integration: new integrations.HttpLambdaIntegration(
+        "LambdaIntegration",
+        apiLambda
+      ),
+    });
+
+    new cdk.CfnOutput(this, "ApiUrl", {
+      value: api.apiEndpoint,
+      description: "Musakorneri API URL",
+    });
+  }
+}

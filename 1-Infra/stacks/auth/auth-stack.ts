@@ -1,10 +1,13 @@
 import * as cdk from "aws-cdk-lib";
 import * as cognito from "aws-cdk-lib/aws-cognito";
 import { Construct } from "constructs";
+import { createPostConfirmationLambda } from "./utils/lambda-utils";
 
 export class AuthStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
+
+    const postConfirmationLambda = createPostConfirmationLambda(this);
 
     const userPool = new cognito.UserPool(this, "UserPool", {
       selfSignUpEnabled: true,
@@ -15,6 +18,9 @@ export class AuthStack extends cdk.Stack {
         requireLowercase: true,
         requireUppercase: true,
         requireDigits: true,
+      },
+      lambdaTriggers: {
+        postConfirmation: postConfirmationLambda,
       },
     });
 

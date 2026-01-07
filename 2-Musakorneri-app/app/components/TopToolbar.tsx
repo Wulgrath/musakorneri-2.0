@@ -1,9 +1,11 @@
 "use client";
 
+import Link from "next/link";
 import { useState, useEffect } from "react";
 
 export function TopToolbar() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
@@ -24,15 +26,36 @@ export function TopToolbar() {
             Musakorneri
           </h1>
           <nav className="flex space-x-4">
-            <a href="/" className="nav-link">
+            <Link href="/" className="nav-link">
               Home
-            </a>
+            </Link>
+            <Link href="/review-album" className="nav-link">
+              Review album
+            </Link>
           </nav>
         </div>
         {isLoggedIn ? (
-          <button onClick={handleLogout} className="nav-link">
-            Logout
-          </button>
+          <div className="relative">
+            <button 
+              onClick={() => setDropdownOpen(!dropdownOpen)}
+              className="nav-link flex items-center"
+            >
+              Account ▼
+            </button>
+            {dropdownOpen && (
+              <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-md shadow-lg">
+                <Link href="/profile" className="block px-4 py-2 text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700">
+                  Profile
+                </Link>
+                <button 
+                  onClick={handleLogout}
+                  className="block w-full text-left px-4 py-2 text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
+                  Logout
+                </button>
+              </div>
+            )}
+          </div>
         ) : (
           <a href="/login" className="nav-link">
             Login
