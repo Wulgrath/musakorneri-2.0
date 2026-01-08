@@ -8,22 +8,28 @@ import {
 
 export const Profile = () => {
   const { data: currentUser, isLoading } = useGetCurrentUserQuery();
-  const [updateUsername] = useUpdateUsernameMutation();
-  const [username, setUsername] = useState(currentUser?.username || "");
+  const [updateUsername, { isLoading: isUpdating }] = useUpdateUsernameMutation();
+  const [username, setUsername] = useState("");
 
-  const handleUpdateUsername = async () => {
-    if (username !== currentUser?.username) {
-      updateUsername({ username });
-    }
-  };
-
-  if (isLoading) {
+  if (isLoading || !currentUser) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-gray-600 dark:text-gray-400">Loading...</div>
       </div>
     );
   }
+
+  if (username === "") {
+    setUsername(currentUser.username);
+  }
+
+  const handleUpdateUsername = () => {
+    if (username !== currentUser.username && username.trim()) {
+      updateUsername({ username: username.trim() });
+    }
+  };
+
+  const isUsernameChanged = username !== currentUser.username && username.trim();
 
   return (
     <div className="flex min-h-screen items-center justify-center">
@@ -37,7 +43,7 @@ export const Profile = () => {
           </label>
           <input
             type="email"
-            value={currentUser?.email || ""}
+            value={currentUser.email}
             className="form-input"
             disabled
           />
@@ -46,21 +52,23 @@ export const Profile = () => {
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             Username
           </label>
-          <input
-            type="text"
-            placeholder="Enter username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            className="form-input"
-          />
+          <div className="space-y-2">
+            <input
+              type="text"
+              placeholder="Enter username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              className="form-input"
+            />
+            <button
+              onClick={handleUpdateUsername}
+              disabled={!isUsernameChanged || isUpdating}
+              className="w-full px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isUpdating ? "Updating..." : "Update Username"}
+            </button>
+          </div>
         </div>
-        <button
-          onClick={handleUpdateUsername}
-          disabled={username === currentUser?.username}
-          className="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-md"
-        >
-          Update Username
-        </button>
       </div>
     </div>
   );

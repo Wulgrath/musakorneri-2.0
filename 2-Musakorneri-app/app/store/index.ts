@@ -1,13 +1,11 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { api } from "./api";
-import albumsReducer from "./albums/albumsSlice";
 import currentUserReducer from "./currentUser/currentUserSlice";
 import { notificationMiddleware } from "./middleware/notification.middleware";
 
 export const store = configureStore({
   reducer: {
     [api.reducerPath]: api.reducer,
-    albums: albumsReducer,
     currentUser: currentUserReducer,
   },
   middleware: (getDefaultMiddleware) =>

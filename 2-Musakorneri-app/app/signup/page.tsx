@@ -24,31 +24,8 @@ export default function SignUp() {
   const handleConfirm = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const result = await confirmSignUp(email, confirmationCode);
-      
-      // Create user in your database after successful confirmation
-      if (result.UserSub) {
-        try {
-          const response = await fetch('/api/users', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              id: result.UserSub,
-              username: email,
-              email: email,
-            }),
-          });
-          
-          if (!response.ok) {
-            console.error('Failed to create user in database');
-          }
-        } catch (dbError) {
-          console.error('Error creating user in database:', dbError);
-        }
-      }
-      
+      await confirmSignUp(email, confirmationCode);
+
       setMessage("Account confirmed! You can now login");
     } catch (error: any) {
       setMessage(error.message);
@@ -58,8 +35,13 @@ export default function SignUp() {
   if (needsConfirmation) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <form onSubmit={handleConfirm} className="w-full max-w-md space-y-4 p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md">
-          <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white">Confirm Email</h2>
+        <form
+          onSubmit={handleConfirm}
+          className="w-full max-w-md space-y-4 p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md"
+        >
+          <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white">
+            Confirm Email
+          </h2>
           <input
             type="text"
             placeholder="Confirmation Code"
@@ -68,10 +50,17 @@ export default function SignUp() {
             className="form-input"
             required
           />
-          <button type="submit" className="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-md">
+          <button
+            type="submit"
+            className="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-md"
+          >
             Confirm
           </button>
-          {message && <p className="text-center text-sm text-gray-600 dark:text-gray-400">{message}</p>}
+          {message && (
+            <p className="text-center text-sm text-gray-600 dark:text-gray-400">
+              {message}
+            </p>
+          )}
         </form>
       </div>
     );
@@ -79,8 +68,13 @@ export default function SignUp() {
 
   return (
     <div className="flex min-h-screen items-center justify-center">
-      <form onSubmit={handleSignUp} className="w-full max-w-md space-y-4 p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md">
-        <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white">Sign Up</h2>
+      <form
+        onSubmit={handleSignUp}
+        className="w-full max-w-md space-y-4 p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md"
+      >
+        <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white">
+          Sign Up
+        </h2>
         <input
           type="email"
           placeholder="Email"
@@ -97,10 +91,17 @@ export default function SignUp() {
           className="form-input"
           required
         />
-        <button type="submit" className="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-md">
+        <button
+          type="submit"
+          className="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-md"
+        >
           Sign Up
         </button>
-        {message && <p className="text-center text-sm text-gray-600 dark:text-gray-400">{message}</p>}
+        {message && (
+          <p className="text-center text-sm text-gray-600 dark:text-gray-400">
+            {message}
+          </p>
+        )}
       </form>
     </div>
   );
