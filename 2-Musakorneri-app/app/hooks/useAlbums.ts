@@ -1,8 +1,8 @@
 "use client";
 
-import { useGetAlbumsQuery } from "../store/api";
 import { useDispatch } from "react-redux";
 import { setAlbums } from "../store/albums/albumsSlice";
+import { useGetAlbumsQuery } from "../store/api/albums.api";
 import { useEffect } from "react";
 
 export const useAlbums = () => {

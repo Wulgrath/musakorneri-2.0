@@ -1,30 +1,23 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { getCurrentUser } from "../../../lib/api";
+import { useState } from "react";
+import {
+  useGetCurrentUserQuery,
+  useUpdateUsernameMutation,
+} from "../../store/api/users.api";
 
 export const Profile = () => {
-  const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
-  const [loading, setLoading] = useState(true);
+  const { data: currentUser, isLoading } = useGetCurrentUserQuery();
+  const [updateUsername] = useUpdateUsernameMutation();
+  const [username, setUsername] = useState(currentUser?.username || "");
 
-  useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const user = await getCurrentUser();
-        setUsername(user.username || '');
-        setEmail(user.email || '');
-      } catch (error) {
-        console.error('Error fetching profile:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const handleUpdateUsername = async () => {
+    if (username !== currentUser?.username) {
+      updateUsername({ username });
+    }
+  };
 
-    fetchProfile();
-  }, []);
-
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-gray-600 dark:text-gray-400">Loading...</div>
@@ -44,7 +37,7 @@ export const Profile = () => {
           </label>
           <input
             type="email"
-            value={email}
+            value={currentUser?.email || ""}
             className="form-input"
             disabled
           />
@@ -61,6 +54,13 @@ export const Profile = () => {
             className="form-input"
           />
         </div>
+        <button
+          onClick={handleUpdateUsername}
+          disabled={username === currentUser?.username}
+          className="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-md"
+        >
+          Update Username
+        </button>
       </div>
     </div>
   );
