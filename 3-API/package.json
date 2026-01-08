@@ -13,6 +13,8 @@
     "@koa/bodyparser": "^5.0.0",
     "@koa/cors": "^5.0.0",
     "@koa/router": "^15.0.0",
+    "@vendia/serverless-express": "^4.12.6",
+    "aws-jwt-verify": "^5.1.1",
     "koa": "^2.14.2",
     "serverless-http": "^2.7.0"
   },

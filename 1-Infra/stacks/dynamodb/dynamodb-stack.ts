@@ -13,22 +13,28 @@ export class DynamodbStack extends cdk.Stack {
     this.albumsTable = new dynamodb.Table(this, "musakorneri-albums-table", {
       tableName: "musakorneri-albums-table",
       partitionKey: { name: "id", type: dynamodb.AttributeType.STRING },
-      removalPolicy: cdk.RemovalPolicy.DESTROY,
+      removalPolicy: cdk.RemovalPolicy.RETAIN,
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+      deletionProtection: true,
     });
 
     this.artistsTable = new dynamodb.Table(this, "musakorneri-artists-table", {
       tableName: "musakorneri-artists-table",
       partitionKey: { name: "id", type: dynamodb.AttributeType.STRING },
-      removalPolicy: cdk.RemovalPolicy.DESTROY,
+      removalPolicy: cdk.RemovalPolicy.RETAIN,
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+      deletionProtection: true,
     });
 
     this.usersTable = new dynamodb.Table(this, "musakorneri-users-table", {
       tableName: "musakorneri-users-table",
       partitionKey: { name: "id", type: dynamodb.AttributeType.STRING },
-      removalPolicy: cdk.RemovalPolicy.DESTROY,
+      removalPolicy: cdk.RemovalPolicy.RETAIN,
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+      deletionProtection: true,
+      pointInTimeRecoverySpecification: {
+        pointInTimeRecoveryEnabled: true,
+      },
     });
 
     this.usersTable.addGlobalSecondaryIndex({

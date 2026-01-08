@@ -3,11 +3,20 @@ import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as apigatewayv2 from "aws-cdk-lib/aws-apigatewayv2";
 import * as integrations from "aws-cdk-lib/aws-apigatewayv2-integrations";
+import * as authorizers from "aws-cdk-lib/aws-apigatewayv2-authorizers";
+import * as cognito from "aws-cdk-lib/aws-cognito";
 import { Construct } from "constructs";
 
 export class ApiStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
+
+    // Import Cognito User Pool
+    const userPool = cognito.UserPool.fromUserPoolId(
+      this,
+      "ImportedUserPool",
+      cdk.Fn.importValue("MusakorneriUserPoolId")
+    );
 
     // Import tables from DynamoDB stack
     const albumsTable = dynamodb.Table.fromTableArn(
@@ -34,6 +43,10 @@ export class ApiStack extends cdk.Stack {
       handler: "dist/app.handler",
       code: lambda.Code.fromAsset("../3-API"),
       timeout: cdk.Duration.seconds(30),
+      environment: {
+        COGNITO_USER_POOL_ID: userPool.userPoolId,
+        COGNITO_CLIENT_ID: cdk.Fn.importValue("MusakorneriClientId"),
+      },
     });
 
     albumsTable.grantReadWriteData(apiLambda);
@@ -51,8 +64,19 @@ export class ApiStack extends cdk.Stack {
           "Accept",
           "X-Requested-With",
         ],
+        exposeHeaders: ["Authorization"],
+        allowCredentials: true,
       },
     });
+
+    // Create Cognito JWT Authorizer
+    const jwtAuthorizer = new authorizers.HttpJwtAuthorizer(
+      "CognitoAuthorizer",
+      `https://cognito-idp.${this.region}.amazonaws.com/${userPool.userPoolId}`,
+      {
+        jwtAudience: [cdk.Fn.importValue("MusakorneriClientId")],
+      }
+    );
 
     // Add Lambda integration
     api.addRoutes({

@@ -1,4 +1,4 @@
-import { SignUpCommand, InitiateAuthCommand, ConfirmSignUpCommand } from "@aws-sdk/client-cognito-identity-provider";
+import { SignUpCommand, InitiateAuthCommand, ConfirmSignUpCommand, ResendConfirmationCodeCommand } from "@aws-sdk/client-cognito-identity-provider";
 import { cognitoClient, cognitoConfig } from "./cognito";
 
 export async function signUp(email: string, password: string) {
@@ -35,6 +35,15 @@ export async function signIn(email: string, password: string) {
       USERNAME: email,
       PASSWORD: password,
     },
+  });
+
+  return await cognitoClient.send(command);
+}
+
+export async function resendConfirmationCode(email: string) {
+  const command = new ResendConfirmationCodeCommand({
+    ClientId: cognitoConfig.clientId,
+    Username: email,
   });
 
   return await cognitoClient.send(command);

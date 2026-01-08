@@ -11,7 +11,12 @@ const app = new Koa();
 const router = new Router();
 
 app.use(bodyParser());
-app.use(cors());
+app.use(cors({
+  origin: '*',
+  allowHeaders: ['Content-Type', 'Authorization', 'Accept', 'X-Requested-With'],
+  exposeHeaders: ['Authorization'],
+  credentials: false,
+}));
 
 // Routes
 router.use("/albums", albumsRouter.routes());
