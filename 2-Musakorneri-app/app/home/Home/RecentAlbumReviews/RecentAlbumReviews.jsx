@@ -1,9 +1,7 @@
 "use client";
 
-import { useSelector } from "react-redux";
 import { useGetRecentAlbumReviewsQuery } from "../../../store/api/reviews.api";
-import { selectAlbumById } from "@/app/store/albums/selectors/albums.selectors";
-import { selectArtistById } from "@/app/store/artists/selectors/artists.selectors";
+import { ReviewCard } from "./ReviewCard/ReviewCard";
 
 export const RecentAlbumReviews = () => {
   const { data, isLoading, error } = useGetRecentAlbumReviewsQuery();
@@ -22,23 +20,5 @@ export const RecentAlbumReviews = () => {
         ))}
       </div>
     </section>
-  );
-};
-
-const ReviewCard = ({ review }) => {
-  const album = useSelector((state) => selectAlbumById(state, review.albumId));
-  const artist = useSelector((state) =>
-    selectArtistById(state, review.artistId)
-  );
-
-  return (
-    <div className="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow">
-      <h3 className="font-semibold text-lg">
-        {album?.name || "Unknown Album"}
-      </h3>
-      <p className="text-gray-600">{artist?.name || "Unknown Artist"}</p>
-      <p className="text-sm text-gray-500">Score: {review.score}/5</p>
-      {album?.year && <p className="text-sm text-gray-500">{album.year}</p>}
-    </div>
   );
 };

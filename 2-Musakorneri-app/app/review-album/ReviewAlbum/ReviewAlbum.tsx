@@ -8,25 +8,37 @@ export const ReviewAlbum = () => {
   const [albumName, setAlbumName] = useState("");
   const [year, setYear] = useState("");
   const [score, setScore] = useState(1);
+  const [error, setError] = useState("");
   const [createReview, { isLoading }] = useCreateReviewMutation();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError("");
+
     try {
       await createReview({ artist, albumName, year, score }).unwrap();
-      // Reset form
+      // Reset form on success
       setArtist("");
       setAlbumName("");
       setYear("");
       setScore(1);
-    } catch (error) {
-      console.error("Failed to create review:", error);
+    } catch (error: any) {
+      if (error.status === 401) {
+        setError("You must be logged in to submit a review.");
+      } else {
+        setError("Failed to create review. Please try again.");
+      }
     }
   };
 
   return (
     <div className="max-w-md mx-auto p-6">
       <h2 className="text-2xl font-bold mb-6">Review Album</h2>
+      {error && (
+        <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+          {error}
+        </div>
+      )}
       <form onSubmit={handleSubmit} className="space-y-4">
         <input
           type="text"

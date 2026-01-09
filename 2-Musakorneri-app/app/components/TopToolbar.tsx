@@ -14,6 +14,7 @@ export function TopToolbar() {
 
   const handleLogout = () => {
     localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
     setIsLoggedIn(false);
     window.location.href = "/";
   };
@@ -29,9 +30,11 @@ export function TopToolbar() {
             <Link href="/" className="nav-link">
               Home
             </Link>
-            <Link href="/review-album" className="nav-link">
-              Review album
-            </Link>
+            {isLoggedIn && (
+              <Link href="/review-album" className="nav-link">
+                Review album
+              </Link>
+            )}
           </nav>
         </div>
         {isLoggedIn ? (

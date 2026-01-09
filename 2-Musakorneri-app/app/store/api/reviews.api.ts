@@ -2,6 +2,7 @@ import { api } from "../api";
 import { RecentAlbumReviewsResponse, ReviewAlbumRequest } from "../../../types";
 import { addAlbums } from "../albums/albumsSlice";
 import { addArtists } from "../artists/artistsSlice";
+import { addUsers } from "../users/usersSlice";
 
 export const reviewsApi = api.injectEndpoints({
   endpoints: (builder) => ({
@@ -21,6 +22,7 @@ export const reviewsApi = api.injectEndpoints({
           const { data } = await queryFulfilled;
           if (data.albums) dispatch(addAlbums(data.albums));
           if (data.artists) dispatch(addArtists(data.artists));
+          if (data.users) dispatch(addUsers(data.users));
         } catch {}
       },
     }),

@@ -5,6 +5,7 @@ import { dynamodbQueryAlbumReviewsByCreatedAt } from "../../services/dynamodb/re
 import { AlbumReview } from "../../types";
 import { uniq } from "lodash";
 import dayjs from "dayjs";
+import { dynamodbBatchGetUsersByIds } from "../../services/dynamodb/user/dynamodb-batch-get-users-by-ids.service";
 
 export const getRecentAlbumReviewsData = async (
   ctx: Context
@@ -22,18 +23,31 @@ export const getRecentAlbumReviewsData = async (
     albumReviewsDuringLastMonth?.map((albumReview) => albumReview.artistId)
   );
 
-  const [albums, artists] = await Promise.all([
+  const userIdsOfReviews = uniq(
+    albumReviewsDuringLastMonth?.map((albumReview) => albumReview.userId)
+  );
+
+  const [albums, artists, users] = await Promise.all([
     albumIdsOfReviews.length > 0
       ? dynamodbBatchGetAlbumsByIds(albumIdsOfReviews)
       : [],
     artistIdsOfReviews.length > 0
       ? dynamodbBatchGetArtistsByIds(artistIdsOfReviews)
       : [],
+    userIdsOfReviews.length > 0
+      ? dynamodbBatchGetUsersByIds(userIdsOfReviews)
+      : [],
   ]);
+
+  const cleanedUsers = users?.map((user) => ({
+    id: user.id,
+    username: user.username,
+  }));
 
   ctx.body = {
     albumReviews: albumReviewsDuringLastMonth,
     albums: albums || [],
     artists: artists || [],
+    users: cleanedUsers || [],
   };
 };

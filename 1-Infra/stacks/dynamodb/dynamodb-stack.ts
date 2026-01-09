@@ -17,6 +17,7 @@ export class DynamodbStack extends cdk.Stack {
       removalPolicy: cdk.RemovalPolicy.RETAIN,
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
       deletionProtection: true,
+      stream: dynamodb.StreamViewType.NEW_AND_OLD_IMAGES,
     });
 
     this.artistsTable = new dynamodb.Table(this, "musakorneri-artists-table", {
@@ -25,6 +26,7 @@ export class DynamodbStack extends cdk.Stack {
       removalPolicy: cdk.RemovalPolicy.RETAIN,
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
       deletionProtection: true,
+      stream: dynamodb.StreamViewType.NEW_AND_OLD_IMAGES,
     });
 
     this.usersTable = new dynamodb.Table(this, "musakorneri-users-table", {
@@ -55,6 +57,7 @@ export class DynamodbStack extends cdk.Stack {
         pointInTimeRecoverySpecification: {
           pointInTimeRecoveryEnabled: true,
         },
+        stream: dynamodb.StreamViewType.NEW_AND_OLD_IMAGES,
       }
     );
 
@@ -63,10 +66,10 @@ export class DynamodbStack extends cdk.Stack {
       partitionKey: { name: "createdAt", type: dynamodb.AttributeType.STRING },
     });
 
-    // this.albumReviewsTable.addGlobalSecondaryIndex({
-    //   indexName: "albumId-index",
-    //   partitionKey: { name: "albumId", type: dynamodb.AttributeType.STRING },
-    // });
+    this.albumReviewsTable.addGlobalSecondaryIndex({
+      indexName: "albumId-index",
+      partitionKey: { name: "albumId", type: dynamodb.AttributeType.STRING },
+    });
 
     new cdk.CfnOutput(this, "AlbumsTableArn", {
       value: this.albumsTable.tableArn,

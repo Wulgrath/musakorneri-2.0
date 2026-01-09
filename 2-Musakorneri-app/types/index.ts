@@ -29,6 +29,7 @@ export interface RecentAlbumReviewsResponse {
   albumReviews: AlbumReview[];
   artists: Artist[];
   albums: Album[];
+  users: User[];
 }
 
 export interface ReviewAlbumRequest {
