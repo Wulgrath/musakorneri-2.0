@@ -1,10 +1,9 @@
-import * as cdk from "aws-cdk-lib/core";
-import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
-import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as apigatewayv2 from "aws-cdk-lib/aws-apigatewayv2";
 import * as integrations from "aws-cdk-lib/aws-apigatewayv2-integrations";
-import * as authorizers from "aws-cdk-lib/aws-apigatewayv2-authorizers";
 import * as cognito from "aws-cdk-lib/aws-cognito";
+import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
+import * as lambda from "aws-cdk-lib/aws-lambda";
+import * as cdk from "aws-cdk-lib/core";
 import { Construct } from "constructs";
 
 export class ApiStack extends cdk.Stack {
@@ -37,12 +36,19 @@ export class ApiStack extends cdk.Stack {
       cdk.Fn.importValue("MusakorneriUsersTableArn")
     );
 
+    const albumReviewsTable = dynamodb.Table.fromTableArn(
+      this,
+      "ImportedAlbumReviewsTable",
+      cdk.Fn.importValue("MusakorneriAlbumReviewsTableArn")
+    );
+
     // Single Koa API Lambda
     const apiLambda = new lambda.Function(this, "MusakorneriApiFunction", {
       runtime: lambda.Runtime.NODEJS_24_X,
       handler: "dist/app.handler",
       code: lambda.Code.fromAsset("../3-API"),
       timeout: cdk.Duration.seconds(30),
+      memorySize: 256,
       environment: {
         COGNITO_USER_POOL_ID: userPool.userPoolId,
         COGNITO_CLIENT_ID: cdk.Fn.importValue("MusakorneriClientId"),
@@ -52,6 +58,7 @@ export class ApiStack extends cdk.Stack {
     albumsTable.grantReadWriteData(apiLambda);
     artistsTable.grantReadWriteData(apiLambda);
     usersTable.grantReadWriteData(apiLambda);
+    albumReviewsTable.grantReadWriteData(apiLambda);
 
     const api = new apigatewayv2.HttpApi(this, "MusakorneriApi", {
       apiName: "Musakorneri API",
@@ -68,15 +75,6 @@ export class ApiStack extends cdk.Stack {
         allowCredentials: true,
       },
     });
-
-    // Create Cognito JWT Authorizer
-    const jwtAuthorizer = new authorizers.HttpJwtAuthorizer(
-      "CognitoAuthorizer",
-      `https://cognito-idp.${this.region}.amazonaws.com/${userPool.userPoolId}`,
-      {
-        jwtAudience: [cdk.Fn.importValue("MusakorneriClientId")],
-      }
-    );
 
     // Add Lambda integration
     api.addRoutes({

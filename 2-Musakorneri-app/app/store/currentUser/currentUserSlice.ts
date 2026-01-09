@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { getCurrentUser } from "../../../lib/api";
+import { logout } from "../../../lib/auth";
 
 interface User {
   id: string;
@@ -42,6 +43,7 @@ export const currentUserSlice = createSlice({
       state.user = null;
       state.loading = false;
       state.error = null;
+      logout();
     },
   },
   extraReducers: (builder) => {

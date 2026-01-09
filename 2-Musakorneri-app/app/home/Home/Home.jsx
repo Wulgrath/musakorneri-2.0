@@ -4,13 +4,8 @@ import { useAlbums } from "../../hooks/useAlbums";
 import { RecentAlbumReviews } from "./RecentAlbumReviews/RecentAlbumReviews";
 
 export const Home = () => {
-  const { albums, loading, error } = useAlbums();
-
-  if (loading) return <div>Loading albums...</div>;
-  if (error) return <div>Error: {error}</div>;
-
   const currentYear = new Date().getFullYear();
-  const topAlbumsThisYear = albums
+  const topAlbumsThisYear = []
     .filter((album) => album.year === currentYear)
     .slice(0, 6);
 

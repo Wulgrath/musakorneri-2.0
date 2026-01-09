@@ -5,23 +5,36 @@ import serverless from "serverless-http";
 import albumsRouter from "./routes/albums";
 import artistsRouter from "./routes/artists";
 import usersRouter from "./routes/users";
+import reviewsRouter from "./routes/reviews";
 import cors from "@koa/cors";
 
 const app = new Koa();
 const router = new Router();
 
 app.use(bodyParser());
-app.use(cors({
-  origin: '*',
-  allowHeaders: ['Content-Type', 'Authorization', 'Accept', 'X-Requested-With'],
-  exposeHeaders: ['Authorization'],
-  credentials: false,
-}));
+app.use(
+  cors({
+    origin: "*",
+    allowHeaders: [
+      "Content-Type",
+      "Authorization",
+      "Accept",
+      "X-Requested-With",
+    ],
+    exposeHeaders: ["Authorization"],
+    credentials: false,
+  })
+);
 
 // Routes
-router.use("/albums", albumsRouter.routes());
-router.use("/artists", artistsRouter.routes());
-router.use("/users", usersRouter.routes());
+router.use("/albums", albumsRouter.routes(), albumsRouter.allowedMethods());
+router.use("/artists", artistsRouter.routes(), artistsRouter.allowedMethods());
+router.use("/users", usersRouter.routes(), usersRouter.allowedMethods());
+router.use(
+  "/album-reviews",
+  reviewsRouter.routes(),
+  reviewsRouter.allowedMethods()
+);
 
 // Health check
 router.get("/health", (ctx) => {

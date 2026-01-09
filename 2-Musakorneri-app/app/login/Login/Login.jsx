@@ -20,6 +20,12 @@ export const Login = () => {
           "accessToken",
           result.AuthenticationResult.AccessToken
         );
+        if (result.AuthenticationResult.RefreshToken) {
+          localStorage.setItem(
+            "refreshToken",
+            result.AuthenticationResult.RefreshToken
+          );
+        }
         window.location.href = "/";
       }
     } catch (error) {
@@ -45,6 +51,12 @@ export const Login = () => {
           "accessToken",
           result.AuthenticationResult.AccessToken
         );
+        if (result.AuthenticationResult.RefreshToken) {
+          localStorage.setItem(
+            "refreshToken",
+            result.AuthenticationResult.RefreshToken
+          );
+        }
         window.location.href = "/";
       }
     } catch (error) {

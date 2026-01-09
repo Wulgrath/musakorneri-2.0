@@ -29,57 +29,21 @@ export const getAlbumById = async (ctx: Context): Promise<void> => {
     const { id } = ctx.params;
     const command = new GetCommand({
       TableName: TABLE_NAME,
-      Key: { id }
+      Key: { id },
     });
-    
+
     const response = await client.send(command);
-    
+
     if (!response.Item) {
       ctx.status = 404;
-      ctx.body = { error: 'Album not found' };
+      ctx.body = { error: "Album not found" };
       return;
     }
-    
+
     ctx.body = response.Item;
   } catch (error) {
-    console.error('Error fetching album:', error);
+    console.error("Error fetching album:", error);
     ctx.status = 500;
-    ctx.body = { error: 'Failed to fetch album' };
-  }
-};
-
-export const createAlbum = async (ctx: Context): Promise<void> => {
-  try {
-    const album = ctx.request.body as CreateAlbumRequest;
-    
-    if (!album.title || !album.artist) {
-      ctx.status = 400;
-      ctx.body = { error: 'Title and artist are required' };
-      return;
-    }
-
-    const item: Album = {
-      id: album.id || Date.now().toString(),
-      title: album.title,
-      artist: album.artist,
-      year: album.year,
-      genre: album.genre,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
-
-    const command = new PutCommand({
-      TableName: TABLE_NAME,
-      Item: item
-    });
-    
-    await client.send(command);
-    
-    ctx.status = 201;
-    ctx.body = item;
-  } catch (error) {
-    console.error('Error creating album:', error);
-    ctx.status = 500;
-    ctx.body = { error: 'Failed to create album' };
+    ctx.body = { error: "Failed to fetch album" };
   }
 };
