@@ -1,7 +1,9 @@
 export interface Album {
   id: string;
-  title: string;
-  artist: string;
+  name: string;
+  artistId: string;
+  reviewScore?: number;
+  reviewCount?: number;
   year?: number;
 }
 
@@ -16,6 +18,7 @@ export interface AlbumReview {
   userId: string;
   score: number;
   createdAt: string;
+  createdAtYearMonth: string;
 }
 
 export interface User {
@@ -30,6 +33,11 @@ export interface RecentAlbumReviewsResponse {
   artists: Artist[];
   albums: Album[];
   users: User[];
+}
+
+export interface AlbumChartsResponse {
+  artists: Artist[];
+  albums: Album[];
 }
 
 export interface ReviewAlbumRequest {

@@ -1,8 +1,5 @@
+import { DynamoDBStreamEvent, DynamoDBRecord, Context } from "aws-lambda";
 import { unmarshall } from "@aws-sdk/util-dynamodb";
-import { Context, DynamoDBRecord, DynamoDBStreamEvent } from "aws-lambda";
-import { round } from "lodash";
-import { dynamodbQueryReviewsByAlbumId } from "../services/dynamodb/reviews/dynamodb-query-reviews-by-album-id.service";
-import { dynamodbUpdateReviewInfoOfAlbum } from "../services/dynamodb/reviews/dynamodb-update-review-score-of-album.service";
 
 export const handler = async (
   event: DynamoDBStreamEvent,
@@ -34,10 +31,11 @@ const processRecord = async (record: DynamoDBRecord): Promise<void> => {
     case "INSERT":
       if (dynamodb?.NewImage) {
         // Handle new album review creation
-        const newReview = unmarshall(dynamodb.NewImage as any);
-        console.log("New album review created:", newReview);
+        const newAlbum = unmarshall(dynamodb.NewImage as any);
 
-        await updateReviewScoreOfAlbum(newReview.albumId);
+        await fetchAlbumDataFromSpotifyApi(newAlbum.name, "");
+
+        console.log("New album review created:", newAlbum);
       }
       break;
 
@@ -47,8 +45,6 @@ const processRecord = async (record: DynamoDBRecord): Promise<void> => {
         const newReview = unmarshall(dynamodb.NewImage as any);
         const oldReview = unmarshall(dynamodb.OldImage as any);
         console.log("Album review modified");
-
-        await updateReviewScoreOfAlbum(newReview.albumId);
       }
       break;
 
@@ -57,8 +53,6 @@ const processRecord = async (record: DynamoDBRecord): Promise<void> => {
         // Handle album review deletion
         const oldReview = unmarshall(dynamodb.OldImage as any);
         console.log("Album review removed");
-
-        await updateReviewScoreOfAlbum(oldReview.albumId);
       }
       break;
 
@@ -67,27 +61,7 @@ const processRecord = async (record: DynamoDBRecord): Promise<void> => {
   }
 };
 
-const updateReviewScoreOfAlbum = async (albumId: string) => {
-  const { reviewScore, reviewCount } = await gatherReviewDataOfAlbum(albumId);
-
-  await dynamodbUpdateReviewInfoOfAlbum(albumId, reviewScore, reviewCount);
-};
-
-const gatherReviewDataOfAlbum = async (albumId: string) => {
-  const albumReviews = await dynamodbQueryReviewsByAlbumId(albumId);
-
-  let reviewScore = 0;
-
-  if (albumReviews.length > 0) {
-    const totalScore = albumReviews.reduce(
-      (acc, review) => acc + Number(review.score),
-      0
-    );
-    reviewScore = round(totalScore / albumReviews.length, 2);
-  }
-
-  return {
-    reviewScore,
-    reviewCount: albumReviews.length,
-  };
-};
+const fetchAlbumDataFromSpotifyApi = async (
+  albumName: string,
+  artistName: string
+) => {};

@@ -1,4 +1,8 @@
+import { get } from "http";
 import { api } from "../api";
+import { AlbumChartsResponse } from "@/types";
+import { addAlbums } from "../albums/albumsSlice";
+import { addArtists } from "../artists/artistsSlice";
 
 export interface Album {
   id: string;
@@ -25,6 +29,16 @@ export const albumsApi = api.injectEndpoints({
       }),
       invalidatesTags: ["Album"],
     }),
+    getAlbumChartsData: builder.query<AlbumChartsResponse, string>({
+      query: (year) => `/albums/album-chart-data/${year}`,
+      providesTags: ["Album", "Artist"],
+      onQueryStarted: async (arg, { dispatch, queryFulfilled }) => {
+        try {
+          const { data } = await queryFulfilled;
+          if (data.artists) dispatch(addArtists(data.artists));
+        } catch {}
+      },
+    }),
   }),
 });
 
@@ -32,4 +46,5 @@ export const {
   useGetAlbumsQuery,
   useGetAlbumByIdQuery,
   useCreateAlbumMutation,
+  useGetAlbumChartsDataQuery,
 } = albumsApi;

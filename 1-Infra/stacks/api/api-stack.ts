@@ -2,6 +2,7 @@ import * as apigatewayv2 from "aws-cdk-lib/aws-apigatewayv2";
 import * as integrations from "aws-cdk-lib/aws-apigatewayv2-integrations";
 import * as cognito from "aws-cdk-lib/aws-cognito";
 import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
+import * as iam from "aws-cdk-lib/aws-iam";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as cdk from "aws-cdk-lib/core";
 import { Construct } from "constructs";
@@ -55,7 +56,26 @@ export class ApiStack extends cdk.Stack {
       },
     });
 
-    albumsTable.grantReadWriteData(apiLambda);
+    // Grant comprehensive permissions for albums table
+    apiLambda.addToRolePolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: [
+          'dynamodb:GetItem',
+          'dynamodb:PutItem',
+          'dynamodb:UpdateItem',
+          'dynamodb:DeleteItem',
+          'dynamodb:BatchGetItem',
+          'dynamodb:BatchWriteItem',
+          'dynamodb:Query',
+          'dynamodb:Scan'
+        ],
+        resources: [
+          albumsTable.tableArn,
+          `${albumsTable.tableArn}/index/*`
+        ]
+      })
+    );
     artistsTable.grantReadWriteData(apiLambda);
     usersTable.grantReadWriteData(apiLambda);
     albumReviewsTable.grantReadWriteData(apiLambda);

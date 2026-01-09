@@ -4,6 +4,7 @@ import currentUserReducer from "./currentUser/currentUserSlice";
 import albumsReducer from "./albums/albumsSlice";
 import artistsReducer from "./artists/artistsSlice";
 import usersReducer from "./users/usersSlice";
+import albumChartsReducer from "./albumCharts/albumChartsSlice";
 
 import { notificationMiddleware } from "./middleware/notification.middleware";
 
@@ -14,6 +15,7 @@ export const store = configureStore({
     albums: albumsReducer,
     artists: artistsReducer,
     users: usersReducer,
+    albumCharts: albumChartsReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware()

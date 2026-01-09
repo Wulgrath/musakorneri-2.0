@@ -5,6 +5,7 @@ import { dynamodbPutNewArtist } from "../../services/dynamodb/artists/dynamodb-p
 import { dynamodbScanArtists } from "../../services/dynamodb/artists/dynamodb-scan-artists.service";
 import { dynamodbPutNewAlbumReview } from "../../services/dynamodb/reviews/dynamodb-put-new-album-review.service";
 import { Album } from "../../types";
+import { create } from "lodash";
 
 export const addAndReviewAlbum = async (ctx: Context): Promise<void> => {
   const userId = ctx.state.userId;
@@ -17,7 +18,8 @@ export const addAndReviewAlbum = async (ctx: Context): Promise<void> => {
   ]);
 
   const alreadyExistingArtist = existingArtists?.find(
-    (existingArtist: any) => existingArtist.name.toLowerCase() === artist.toLowerCase()
+    (existingArtist: any) =>
+      existingArtist.name.toLowerCase() === artist.toLowerCase()
   );
 
   const now = new Date().toISOString();
@@ -48,6 +50,7 @@ export const addAndReviewAlbum = async (ctx: Context): Promise<void> => {
       userId,
       score,
       createdAt: now,
+      createdAtYearMonth: now.slice(0, 7),
       artistId: newArtist.id,
     };
 
@@ -76,6 +79,7 @@ export const addAndReviewAlbum = async (ctx: Context): Promise<void> => {
         userId,
         score,
         createdAt: now,
+        createdAtYearMonth: now.slice(0, 7),
         artistId: alreadyExistingArtist.id,
       };
 
@@ -87,6 +91,7 @@ export const addAndReviewAlbum = async (ctx: Context): Promise<void> => {
         userId,
         score,
         createdAt: now,
+        createdAtYearMonth: now.slice(0, 7),
         artistId: alreadyExistingArtist.id,
       };
 

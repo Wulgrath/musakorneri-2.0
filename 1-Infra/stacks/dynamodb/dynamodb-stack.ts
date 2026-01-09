@@ -20,6 +20,12 @@ export class DynamodbStack extends cdk.Stack {
       stream: dynamodb.StreamViewType.NEW_AND_OLD_IMAGES,
     });
 
+    this.albumsTable.addGlobalSecondaryIndex({
+      indexName: "year-reviewScore-index",
+      partitionKey: { name: "year", type: dynamodb.AttributeType.STRING },
+      sortKey: { name: "reviewScore", type: dynamodb.AttributeType.NUMBER },
+    });
+
     this.artistsTable = new dynamodb.Table(this, "musakorneri-artists-table", {
       tableName: "musakorneri-artists-table",
       partitionKey: { name: "id", type: dynamodb.AttributeType.STRING },

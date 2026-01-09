@@ -26,6 +26,7 @@ export interface AlbumReview {
   albumId: string;
   score: number;
   createdAt: string;
+  createdAtYearMonth: string;
 }
 
 export interface CreateAlbumRequest {
