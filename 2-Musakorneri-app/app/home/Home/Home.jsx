@@ -1,6 +1,5 @@
 "use client";
 
-import { useAlbums } from "../../hooks/useAlbums";
 import { RecentAlbumReviews } from "./RecentAlbumReviews/RecentAlbumReviews";
 
 export const Home = () => {
@@ -11,8 +10,6 @@ export const Home = () => {
 
   return (
     <div className="p-6 space-y-8">
-      <h1 className="text-3xl font-bold">Welcome to Musakorneri</h1>
-
       <RecentAlbumReviews />
 
       <section>

@@ -32,7 +32,9 @@ export default function RootLayout({
       >
         <ReduxProvider>
           <TopToolbar />
-          {children}
+          <div className="max-w-7xl mx-auto">
+            {children}
+          </div>
         </ReduxProvider>
       </body>
     </html>
