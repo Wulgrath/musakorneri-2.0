@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { signUp, confirmSignUp } from "../../lib/auth";
+import { signUp, confirmSignUp, signIn } from "../../lib/auth";
 
 export default function SignUp() {
   const [email, setEmail] = useState("");
@@ -9,13 +9,18 @@ export default function SignUp() {
   const [confirmationCode, setConfirmationCode] = useState("");
   const [needsConfirmation, setNeedsConfirmation] = useState(false);
   const [message, setMessage] = useState("");
+  const [tempCredentials, setTempCredentials] = useState<{email: string, password: string} | null>(null);
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       await signUp(email, password);
+      // Store credentials temporarily for auto-login
+      setTempCredentials({ email, password });
       setNeedsConfirmation(true);
       setMessage("Check your email for confirmation code");
+      // Clear form state
+      setPassword("");
     } catch (error: any) {
       setMessage(error.message);
     }
@@ -25,9 +30,20 @@ export default function SignUp() {
     e.preventDefault();
     try {
       await confirmSignUp(email, confirmationCode);
-
-      setMessage("Account confirmed! You can now login");
+      
+      // Auto-login with temporarily stored credentials
+      if (tempCredentials) {
+        const result = await signIn(tempCredentials.email, tempCredentials.password);
+        // Clear temp credentials immediately
+        setTempCredentials(null);
+        
+        if (result.AuthenticationResult) {
+          setMessage("Account confirmed and logged in!");
+          window.location.href = "/";
+        }
+      }
     } catch (error: any) {
+      setTempCredentials(null); // Clear on error
       setMessage(error.message);
     }
   };
