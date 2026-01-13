@@ -2,13 +2,14 @@
 
 import { useGetRecentAlbumReviewsQuery } from "../../../store/api/reviews.api";
 import { ReviewCard } from "./ReviewCard/ReviewCard";
+import { orderBy } from "lodash-es";
 
 export const RecentAlbumReviews = () => {
   const { data, isLoading, error } = useGetRecentAlbumReviewsQuery();
 
   if (error) return <div>Error loading recent reviews</div>;
 
-  const albumReviews = data?.albumReviews || [];
+  const albumReviews = data?.albumReviews ? orderBy(data.albumReviews, ['createdAt'], ['desc']) : [];
 
   return (
     <section>

@@ -1,0 +1,21 @@
+{
+  "name": "musakorneri-scheduled-lambdas",
+  "version": "1.0.0",
+  "description": "Scheduled Lambda functions for Musakorneri",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w"
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "3.713.0",
+    "@aws-sdk/client-s3": "^3.967.0",
+    "@aws-sdk/client-sqs": "3.713.0",
+    "@aws-sdk/lib-dynamodb": "3.713.0"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.0",
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  }
+}

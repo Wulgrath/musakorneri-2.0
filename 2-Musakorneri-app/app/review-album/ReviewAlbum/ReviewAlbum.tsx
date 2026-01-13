@@ -71,7 +71,7 @@ export const ReviewAlbum = () => {
           <select
             value={score}
             onChange={(e) => setScore(Number(e.target.value))}
-            className="w-full p-2 border rounded"
+            className="w-full p-2 border rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
           >
             {[1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5].map((num) => (
               <option key={num} value={num}>

@@ -21,7 +21,7 @@ export const ChartFilters = () => {
   );
 
   return (
-    <div className="mb-6 pl-4">
+    <div className="mb-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
         Year
       </label>

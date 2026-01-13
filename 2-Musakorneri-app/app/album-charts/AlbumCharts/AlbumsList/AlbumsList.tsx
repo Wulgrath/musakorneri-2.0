@@ -26,16 +26,28 @@ export const AlbumsList = () => {
         return (
           <div
             key={album.id}
-            className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg"
+            className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden"
           >
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-              {album.name}
-            </h3>
-            <p className="text-gray-600 dark:text-gray-400">{artist?.name}</p>
-            <div className="flex gap-4 mt-2 text-sm text-gray-500 dark:text-gray-400">
-              <span>Year: {album.year}</span>
-              <span>Score: {album.reviewScore || "N/A"}</span>
-              <span>Reviews: {album.reviewCount || 0}</span>
+            <div className="flex items-center h-full p-2">
+              <img 
+                src={`https://musakorneri-files.s3.amazonaws.com/album-covers/thumbs/${album.id}.jpg`}
+                alt={`${album.name} cover`}
+                className="w-24 h-24 object-contain flex-shrink-0 ml-2"
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                }}
+              />
+              <div className="flex-1 p-4 flex flex-col justify-center">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  {album.name}
+                </h3>
+                <p className="text-gray-600 dark:text-gray-400">{artist?.name}</p>
+                <div className="flex gap-4 mt-2 text-sm text-gray-500 dark:text-gray-400">
+                  <span>Year: {album.year}</span>
+                  <span>Score: {album.reviewScore || "N/A"}</span>
+                  <span>Reviews: {album.reviewCount || 0}</span>
+                </div>
+              </div>
             </div>
           </div>
         );
