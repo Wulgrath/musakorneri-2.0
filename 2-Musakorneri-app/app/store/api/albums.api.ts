@@ -1,7 +1,5 @@
-import { get } from "http";
-import { api } from "../api";
 import { AlbumChartsResponse } from "@/types";
-import { addAlbums } from "../albums/albumsSlice";
+import { api } from "../api";
 import { addArtists } from "../artists/artistsSlice";
 
 export interface Album {

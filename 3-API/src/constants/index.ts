@@ -17,3 +17,6 @@ export const MUSAKORNERI_ALBUM_REVIEWS_TABLE =
 
 export const MUSAKORNERI_ALBUM_REVIEWS_TABLE_CREATED_AT_INDEX =
   "createdAt-index";
+
+export const MUSAKORNERI_ALBUM_REVIEWS_USER_ID_ALBUM_ID_INDEX =
+  "userId-albumId-index";

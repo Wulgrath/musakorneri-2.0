@@ -6,7 +6,6 @@ import { useCreateReviewMutation } from "../../store/api/reviews.api";
 export const ReviewAlbum = () => {
   const [artist, setArtist] = useState("");
   const [albumName, setAlbumName] = useState("");
-  const [year, setYear] = useState("");
   const [score, setScore] = useState(1);
   const [error, setError] = useState("");
   const [createReview, { isLoading }] = useCreateReviewMutation();
@@ -16,11 +15,10 @@ export const ReviewAlbum = () => {
     setError("");
 
     try {
-      await createReview({ artist, albumName, year, score }).unwrap();
+      await createReview({ artist, albumName, score }).unwrap();
       // Reset form on success
       setArtist("");
       setAlbumName("");
-      setYear("");
       setScore(1);
     } catch (error: any) {
       if (error.status === 401) {
@@ -54,16 +52,6 @@ export const ReviewAlbum = () => {
           value={albumName}
           onChange={(e) => setAlbumName(e.target.value)}
           className="w-full p-2 border rounded"
-          required
-        />
-        <input
-          type="number"
-          placeholder="Year"
-          value={year}
-          onChange={(e) => setYear(e.target.value)}
-          className="w-full p-2 border rounded"
-          min="1900"
-          max="2030"
           required
         />
         <div>

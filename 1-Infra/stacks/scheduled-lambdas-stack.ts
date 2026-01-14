@@ -2,6 +2,8 @@ import * as cdk from "aws-cdk-lib/core";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as sqs from "aws-cdk-lib/aws-sqs";
 import * as s3 from "aws-cdk-lib/aws-s3";
+import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
+import * as iam from "aws-cdk-lib/aws-iam";
 import * as lambdaEventSources from "aws-cdk-lib/aws-lambda-event-sources";
 import { Construct } from "constructs";
 
@@ -48,5 +50,13 @@ export class MusakorneriScheduledLambdasStack extends cdk.Stack {
     // Grant permissions
     musicBrainzQueue.grantConsumeMessages(processMusicBrainzQueueLambda);
     filesBucket.grantWrite(processMusicBrainzQueueLambda);
+
+    // Grant DynamoDB permissions
+    const albumsTable = dynamodb.Table.fromTableArn(
+      this,
+      "ImportedAlbumsTable",
+      cdk.Fn.importValue("MusakorneriAlbumsTableArn")
+    );
+    albumsTable.grantWriteData(processMusicBrainzQueueLambda);
   }
 }

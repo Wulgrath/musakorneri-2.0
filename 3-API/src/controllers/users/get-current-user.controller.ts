@@ -2,7 +2,7 @@ import { Context } from "koa";
 import { dynamodbGetUserById } from "../../services/dynamodb/user/dynamodb-get-user-by-id.service";
 
 export const getCurrentUser = async (ctx: Context): Promise<void> => {
-  const userId = ctx.state.userId;
+  const { userId } = ctx.state;
 
   const user = await dynamodbGetUserById(userId);
 

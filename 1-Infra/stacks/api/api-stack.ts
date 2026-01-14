@@ -56,7 +56,7 @@ export class ApiStack extends cdk.Stack {
       },
     });
 
-    // Grant comprehensive permissions for albums table
+    // Grant comprehensive permissions for all tables
     apiLambda.addToRolePolicy(
       new iam.PolicyStatement({
         effect: iam.Effect.ALLOW,
@@ -72,13 +72,14 @@ export class ApiStack extends cdk.Stack {
         ],
         resources: [
           albumsTable.tableArn,
-          `${albumsTable.tableArn}/index/*`
+          `${albumsTable.tableArn}/index/*`,
+          albumReviewsTable.tableArn,
+          `${albumReviewsTable.tableArn}/index/*`
         ]
       })
     );
     artistsTable.grantReadWriteData(apiLambda);
     usersTable.grantReadWriteData(apiLambda);
-    albumReviewsTable.grantReadWriteData(apiLambda);
 
     const api = new apigatewayv2.HttpApi(this, "MusakorneriApi", {
       apiName: "Musakorneri API",

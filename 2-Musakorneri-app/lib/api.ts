@@ -11,7 +11,7 @@ export async function apiRequest(endpoint: string, options: RequestInit = {}) {
   if (token && isTokenExpired(token)) {
     const refreshResult = await refreshToken();
     token = refreshResult?.AuthenticationResult?.AccessToken || null;
-    
+
     if (!token) {
       window.location.href = "/login";
       throw new Error("Authentication failed");
@@ -36,7 +36,7 @@ export async function apiRequest(endpoint: string, options: RequestInit = {}) {
   // If token expired, try to refresh
   if (response.status === 401) {
     const refreshResult = await refreshToken();
-    
+
     if (refreshResult?.AuthenticationResult?.AccessToken) {
       token = refreshResult.AuthenticationResult.AccessToken;
       response = await makeRequest(token);

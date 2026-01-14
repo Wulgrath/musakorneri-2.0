@@ -2,6 +2,7 @@ import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { Context, SQSEvent } from "aws-lambda";
 import { s3Client } from "../instances/aws";
 import { dynamodbUpdateAlbumMusicBrainzReleaseId } from "../services/dynamodb/albums/dynamodb-update-album-music-brainz-release-id.service";
+import { dynamodbUpdateAlbumYear } from "../services/dynamodb/albums/dynamodb-update-album-year.service";
 
 const FILES_BUCKET_NAME = process.env.FILES_BUCKET_NAME;
 
@@ -28,6 +29,18 @@ export const handler = async (
           payload.albumId,
           albumData.id
         );
+
+        // Update year from earliest release date
+        if (albumData.allReleases?.length > 0) {
+          const earliestRelease = albumData.allReleases
+            .filter((r: any) => r.date)
+            .sort((a: any, b: any) => a.date.localeCompare(b.date))[0];
+
+          if (earliestRelease?.date) {
+            const year = earliestRelease.date.split("-")[0];
+            await dynamodbUpdateAlbumYear(payload.albumId, year);
+          }
+        }
 
         // Fetch and store cover art
         const coverArtUrl = await fetchAndStoreCoverArt(
@@ -58,7 +71,7 @@ const fetchAlbumDataFromMusicBrainz = async (
     }`;
     const url = `https://musicbrainz.org/ws/2/release/?query=${encodeURIComponent(
       query
-    )}&fmt=json&limit=10`;
+    )}&fmt=json&limit=20`;
 
     const response = await fetch(url, {
       headers: {
@@ -90,18 +103,31 @@ const fetchAlbumDataFromMusicBrainz = async (
           date: releaseWithCoverArt.release.date,
           country: releaseWithCoverArt.release.country,
         });
-        return releaseWithCoverArt.release;
+
+        return {
+          ...releaseWithCoverArt.release,
+          allReleases: data.releases,
+        };
       }
 
-      // If no release has cover art, return the first one
+      // If no release has cover art, return the first one with earliest date info
       const release = data.releases[0];
+      const earliestRelease = data.releases
+        .filter((r: any) => r.date)
+        .sort((a: any, b: any) => a.date.localeCompare(b.date))[0];
+
       console.log("No cover art found, using first release:", {
         id: release.id,
         title: release.title,
         date: release.date,
         country: release.country,
+        earliestDate: earliestRelease?.date,
       });
-      return release;
+
+      return {
+        ...release,
+        allReleases: data.releases,
+      };
     }
 
     console.log("No album found for:", albumName, artistName);
@@ -138,6 +164,7 @@ const fetchAndStoreCoverArt = async (releaseId: string, albumId: string) => {
       headers: {
         "User-Agent": "Musakorneri.in/0.1 (wulgrath@gmail.com)",
       },
+      signal: AbortSignal.timeout(30000), // 30 second timeout
     });
 
     if (!metadataResponse.ok) {
@@ -158,10 +185,8 @@ const fetchAndStoreCoverArt = async (releaseId: string, albumId: string) => {
       return null;
     }
 
-    // Store full size image
-    const fullImageBuffer = await fetch(frontCover.image).then((r) =>
-      r.arrayBuffer()
-    );
+    // Store full size image with retry logic
+    const fullImageBuffer = await fetchWithRetry(frontCover.image);
     const contentType = "image/jpeg";
     const fullKey = `album-covers/${albumId}.jpg`;
 
@@ -176,9 +201,7 @@ const fetchAndStoreCoverArt = async (releaseId: string, albumId: string) => {
 
     // Store thumbnail (250px)
     if (frontCover.thumbnails?.small) {
-      const thumbBuffer = await fetch(frontCover.thumbnails.small).then((r) =>
-        r.arrayBuffer()
-      );
+      const thumbBuffer = await fetchWithRetry(frontCover.thumbnails.small);
       const thumbKey = `album-covers/thumbs/${albumId}.jpg`;
 
       await s3Client.send(
@@ -196,4 +219,39 @@ const fetchAndStoreCoverArt = async (releaseId: string, albumId: string) => {
     console.error("Error fetching/storing cover art:", error);
     return null;
   }
+};
+
+const fetchWithRetry = async (
+  url: string,
+  maxRetries = 3
+): Promise<ArrayBuffer> => {
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      const response = await fetch(url, {
+        headers: {
+          "User-Agent": "Musakorneri.in/0.1 (wulgrath@gmail.com)",
+        },
+        signal: AbortSignal.timeout(30000), // 30 second timeout
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+
+      return await response.arrayBuffer();
+    } catch (error) {
+      console.log(`Fetch attempt ${attempt} failed:`, error);
+
+      if (attempt === maxRetries) {
+        throw error;
+      }
+
+      // Exponential backoff: 2s, 4s, 8s
+      const delay = Math.pow(2, attempt) * 1000;
+      console.log(`Retrying in ${delay}ms...`);
+      await new Promise((resolve) => setTimeout(resolve, delay));
+    }
+  }
+
+  throw new Error("Max retries exceeded");
 };

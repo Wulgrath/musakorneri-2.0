@@ -35,6 +35,17 @@ export interface RecentAlbumReviewsResponse {
   users: User[];
 }
 
+export interface RecentAlbumReviewsResponse {
+  albumReviews: AlbumReview[];
+  artists: Artist[];
+  albums: Album[];
+  users: User[];
+}
+
+export interface UserAlbumReviewsResponse {
+  reviews: AlbumReview[];
+}
+
 export interface AlbumChartsResponse {
   artists: Artist[];
   albums: Album[];
@@ -43,6 +54,5 @@ export interface AlbumChartsResponse {
 export interface ReviewAlbumRequest {
   artist: string;
   albumName: string;
-  year: string;
   score: number;
 }

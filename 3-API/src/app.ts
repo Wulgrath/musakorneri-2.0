@@ -5,7 +5,7 @@ import serverless from "serverless-http";
 import albumsRouter from "./routes/albums";
 import artistsRouter from "./routes/artists";
 import usersRouter from "./routes/users";
-import reviewsRouter from "./routes/reviews";
+import reviewsRouter from "./routes/album-reviews";
 import cors from "@koa/cors";
 
 const app = new Koa();

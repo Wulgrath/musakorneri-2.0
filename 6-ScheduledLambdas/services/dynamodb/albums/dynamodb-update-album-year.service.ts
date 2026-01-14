@@ -2,17 +2,20 @@ import { UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import { docClient } from "../../../instances/aws";
 import { MUSAKORNERI_ALBUMS_TABLE } from "../../../constants";
 
-export const dynamodbUpdateAlbumMusicBrainzReleaseId = async (
+export const dynamodbUpdateAlbumYear = async (
   albumId: string,
-  musicbrainzReleaseId: string
+  year: string
 ): Promise<void> => {
   await docClient.send(
     new UpdateCommand({
       TableName: MUSAKORNERI_ALBUMS_TABLE,
       Key: { id: albumId },
-      UpdateExpression: "SET musicbrainzReleaseId = :releaseId",
+      UpdateExpression: "SET #year = :year",
+      ExpressionAttributeNames: {
+        "#year": "year",
+      },
       ExpressionAttributeValues: {
-        ":releaseId": musicbrainzReleaseId,
+        ":year": year,
       },
     })
   );

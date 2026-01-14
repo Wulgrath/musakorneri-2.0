@@ -1,4 +1,5 @@
 import { api } from "../api";
+import { setCurrentUser } from "../currentUser/currentUserSlice";
 
 export interface User {
   id: string;
@@ -12,6 +13,12 @@ export const usersApi = api.injectEndpoints({
     getCurrentUser: builder.query<User, void>({
       query: () => "/users/me",
       providesTags: ["User"],
+      onQueryStarted: async (arg, { dispatch, queryFulfilled }) => {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(setCurrentUser(data));
+        } catch {}
+      },
     }),
     updateUsername: builder.mutation<User, { username: string }>({
       query: ({ username }) => ({
@@ -22,6 +29,7 @@ export const usersApi = api.injectEndpoints({
       invalidatesTags: ["User"],
     }),
   }),
+  overrideExisting: true,
 });
 
 export const { useGetCurrentUserQuery, useUpdateUsernameMutation } = usersApi;

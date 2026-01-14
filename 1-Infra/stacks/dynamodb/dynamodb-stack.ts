@@ -77,9 +77,20 @@ export class DynamodbStack extends cdk.Stack {
       partitionKey: { name: "albumId", type: dynamodb.AttributeType.STRING },
     });
 
+    this.albumReviewsTable.addGlobalSecondaryIndex({
+      indexName: "userId-albumId-index",
+      partitionKey: { name: "userId", type: dynamodb.AttributeType.STRING },
+      sortKey: { name: "albumId", type: dynamodb.AttributeType.STRING },
+    });
+
     new cdk.CfnOutput(this, "AlbumsTableArn", {
       value: this.albumsTable.tableArn,
       exportName: "MusakorneriAlbumsTableArn",
+    });
+
+    new cdk.CfnOutput(this, "AlbumsTableName", {
+      value: this.albumsTable.tableName,
+      exportName: "MusakorneriAlbumsTableName",
     });
 
     new cdk.CfnOutput(this, "ArtistsTableArn", {

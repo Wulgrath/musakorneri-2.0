@@ -8,6 +8,11 @@ export const selectCurrentUser = createSelector(
   (state) => state.user
 );
 
+export const selectCurrentUserId = createSelector(
+  [selectCurrentUser],
+  (currentUser) => currentUser?.id
+);
+
 export const selectCurrentUserLoading = createSelector(
   [currentUserState],
   (state) => state.loading

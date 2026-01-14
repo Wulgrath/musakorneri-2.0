@@ -1,8 +1,13 @@
 import { api } from "../api";
-import { RecentAlbumReviewsResponse, ReviewAlbumRequest } from "../../../types";
+import {
+  RecentAlbumReviewsResponse,
+  ReviewAlbumRequest,
+  UserAlbumReviewsResponse,
+} from "../../../types";
 import { addAlbums } from "../albums/albumsSlice";
 import { addArtists } from "../artists/artistsSlice";
 import { addUsers } from "../users/usersSlice";
+import { addReviews } from "../reviews/reviewsSlice";
 
 export const reviewsApi = api.injectEndpoints({
   endpoints: (builder) => ({
@@ -26,8 +31,31 @@ export const reviewsApi = api.injectEndpoints({
         } catch {}
       },
     }),
+    getUserAlbumReviews: builder.query<UserAlbumReviewsResponse, void>({
+      query: (userId) => `/album-reviews/user/${userId}/get-user-reviews`,
+      providesTags: ["AlbumReview"],
+      onQueryStarted: async (arg, { dispatch, queryFulfilled }) => {
+        try {
+          const { data } = await queryFulfilled;
+          if (data.reviews) dispatch(addReviews(data.reviews));
+        } catch {}
+      },
+    }),
+    getMyAlbumReviews: builder.query({
+      query: () => "/album-reviews/my-album-reviews",
+      providesTags: ["AlbumReview"],
+      onQueryStarted: async (arg, { dispatch, queryFulfilled }) => {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(addReviews(data.albumReviews));
+        } catch {}
+      },
+    }),
   }),
 });
 
-export const { useCreateReviewMutation, useGetRecentAlbumReviewsQuery } =
-  reviewsApi;
+export const {
+  useCreateReviewMutation,
+  useGetRecentAlbumReviewsQuery,
+  useGetMyAlbumReviewsQuery,
+} = reviewsApi;

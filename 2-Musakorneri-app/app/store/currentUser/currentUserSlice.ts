@@ -1,5 +1,4 @@
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { getCurrentUser } from "../../../lib/api";
+import { createSlice } from "@reduxjs/toolkit";
 import { logout } from "../../../lib/auth";
 
 interface User {
@@ -21,15 +20,6 @@ const initialState: CurrentUserState = {
   error: null,
 };
 
-// Async thunk for fetching current user
-export const fetchCurrentUser = createAsyncThunk(
-  'currentUser/fetchCurrentUser',
-  async () => {
-    const userData = await getCurrentUser();
-    return userData;
-  }
-);
-
 export const currentUserSlice = createSlice({
   name: "currentUser",
   initialState,
@@ -46,22 +36,7 @@ export const currentUserSlice = createSlice({
       logout();
     },
   },
-  extraReducers: (builder) => {
-    builder
-      .addCase(fetchCurrentUser.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(fetchCurrentUser.fulfilled, (state, action) => {
-        state.loading = false;
-        state.user = action.payload;
-        state.error = null;
-      })
-      .addCase(fetchCurrentUser.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.error.message || 'Failed to fetch user';
-      });
-  },
+  extraReducers: (builder) => {},
 });
 
 export const { setCurrentUser, clearCurrentUser } = currentUserSlice.actions;
