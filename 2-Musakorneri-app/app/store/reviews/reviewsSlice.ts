@@ -14,9 +14,10 @@ export const reviewsSlice = createSlice({
   reducers: {
     setReviews: reviewsAdapter.setAll,
     addReviews: reviewsAdapter.addMany,
+    updateReview: reviewsAdapter.updateOne,
   },
   extraReducers: (builder) => {},
 });
 
-export const { setReviews, addReviews } = reviewsSlice.actions;
+export const { setReviews, addReviews, updateReview } = reviewsSlice.actions;
 export default reviewsSlice.reducer;

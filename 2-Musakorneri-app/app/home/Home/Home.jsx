@@ -12,7 +12,7 @@ export const Home = () => {
     <div className="p-6 space-y-8">
       <RecentAlbumReviews />
 
-      <section>
+      {/* <section>
         <h2 className="text-2xl font-semibold mb-4">
           Top Albums of {currentYear}
         </h2>
@@ -32,7 +32,7 @@ export const Home = () => {
             <p className="text-gray-500">No albums from {currentYear} yet.</p>
           )}
         </div>
-      </section>
+      </section> */}
     </div>
   );
 };

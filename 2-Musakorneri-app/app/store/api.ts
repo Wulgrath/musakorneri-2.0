@@ -1,8 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { refreshToken } from "../../lib/auth";
 import { isTokenExpired } from "../../lib/token-utils";
-import { setReviews } from "./reviews/reviewsSlice";
-import { setCurrentUser } from "./currentUser/currentUserSlice";
 
 const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
   let token = localStorage.getItem("accessToken");
@@ -67,4 +65,3 @@ export const api = createApi({
   tagTypes: ["Album", "User", "Artist", "AlbumReview"],
   endpoints: () => ({}),
 });
-

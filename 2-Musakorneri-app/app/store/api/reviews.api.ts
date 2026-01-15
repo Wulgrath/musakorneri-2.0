@@ -3,11 +3,12 @@ import {
   RecentAlbumReviewsResponse,
   ReviewAlbumRequest,
   UserAlbumReviewsResponse,
+  AlbumReview,
 } from "../../../types";
 import { addAlbums } from "../albums/albumsSlice";
 import { addArtists } from "../artists/artistsSlice";
 import { addUsers } from "../users/usersSlice";
-import { addReviews } from "../reviews/reviewsSlice";
+import { addReviews, updateReview } from "../reviews/reviewsSlice";
 
 export const reviewsApi = api.injectEndpoints({
   endpoints: (builder) => ({
@@ -18,6 +19,25 @@ export const reviewsApi = api.injectEndpoints({
         body: reviewData,
       }),
       invalidatesTags: ["Album", "Artist", "AlbumReview"],
+    }),
+    updateAlbumReview: builder.mutation<
+      { albumReview: AlbumReview },
+      { albumId: string; score: number }
+    >({
+      query: ({ albumId, score }) => ({
+        url: `/album-reviews/album/${albumId}/update-album-review`,
+        method: "PATCH",
+        body: { score },
+      }),
+      invalidatesTags: ["Album", "AlbumReview"],
+      onQueryStarted: async (arg, { dispatch, queryFulfilled }) => {
+        try {
+          const { data } = await queryFulfilled;
+          if (data.albumReview) {
+            dispatch(updateReview({ id: data.albumReview.id, changes: data.albumReview }));
+          }
+        } catch {}
+      },
     }),
     getRecentAlbumReviews: builder.query<RecentAlbumReviewsResponse, void>({
       query: () => "/album-reviews/recent-album-reviews",
@@ -56,6 +76,7 @@ export const reviewsApi = api.injectEndpoints({
 
 export const {
   useCreateReviewMutation,
+  useUpdateAlbumReviewMutation,
   useGetRecentAlbumReviewsQuery,
   useGetMyAlbumReviewsQuery,
 } = reviewsApi;
