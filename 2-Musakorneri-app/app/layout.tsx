@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ReduxProvider } from "./components/ReduxProvider";
 import { TopToolbar } from "./components/TopToolbar/TopToolbar";
+import { Footer } from "./components/Footer/Footer";
 import "./globals.css";
 import React from "react";
 
@@ -35,6 +36,7 @@ export default function RootLayout({
           <div className="max-w-7xl mx-auto">
             {children}
           </div>
+          <Footer />
         </ReduxProvider>
       </body>
     </html>
