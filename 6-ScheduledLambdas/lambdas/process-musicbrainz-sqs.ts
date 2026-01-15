@@ -52,8 +52,9 @@ export const handler = async (
         }
       }
 
-      // Add 1-second delay for rate limiting
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // Add 1.5-2 second delay for rate limiting (with jitter)
+      const delay = 1500 + Math.random() * 500;
+      await new Promise((resolve) => setTimeout(resolve, delay));
     }
   } catch (error) {
     console.error("Error processing MusicBrainz queue:", error);
@@ -63,79 +64,95 @@ export const handler = async (
 
 const fetchAlbumDataFromMusicBrainz = async (
   albumName: string,
-  artistName: string
+  artistName: string,
+  retries = 5
 ) => {
-  try {
-    const query = `release:"${albumName}"${
-      artistName ? ` AND artist:"${artistName}"` : ""
-    }`;
-    const url = `https://musicbrainz.org/ws/2/release/?query=${encodeURIComponent(
-      query
-    )}&fmt=json&limit=20`;
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      const query = `release:"${albumName}"${
+        artistName ? ` AND artist:"${artistName}"` : ""
+      }`;
+      const url = `https://musicbrainz.org/ws/2/release/?query=${encodeURIComponent(
+        query
+      )}&fmt=json&limit=20`;
 
-    const response = await fetch(url, {
-      headers: {
-        "User-Agent": "Musakorneri.in/0.1 (wulgrath@gmail.com)",
-      },
-    });
+      const response = await fetch(url, {
+        headers: {
+          "User-Agent": "Musakorneri.in/0.1 (wulgrath@gmail.com)",
+        },
+        signal: AbortSignal.timeout(30000),
+      });
 
-    if (!response.ok) {
-      throw new Error(`MusicBrainz API error: ${response.status}`);
-    }
+      if (!response.ok) {
+        throw new Error(`MusicBrainz API error: ${response.status}`);
+      }
 
-    const data: any = await response.json();
+      const data: any = await response.json();
 
-    if (data.releases && data.releases.length > 0) {
-      // Check first 3 releases in parallel for cover art
-      const releasesToCheck = data.releases.slice(0, 3);
-      const coverArtChecks = releasesToCheck.map(async (release: any) => ({
-        release,
-        hasCoverArt: await checkCoverArtExists(release.id),
-      }));
+      if (data.releases && data.releases.length > 0) {
+        // Check first 3 releases in parallel for cover art
+        const releasesToCheck = data.releases.slice(0, 3);
+        const coverArtChecks = releasesToCheck.map(async (release: any) => ({
+          release,
+          hasCoverArt: await checkCoverArtExists(release.id),
+        }));
 
-      const results = await Promise.all(coverArtChecks);
-      const releaseWithCoverArt = results.find((r) => r.hasCoverArt);
+        const results = await Promise.all(coverArtChecks);
+        const releaseWithCoverArt = results.find((r) => r.hasCoverArt);
 
-      if (releaseWithCoverArt) {
-        console.log("Found release with cover art:", {
-          id: releaseWithCoverArt.release.id,
-          title: releaseWithCoverArt.release.title,
-          date: releaseWithCoverArt.release.date,
-          country: releaseWithCoverArt.release.country,
+        if (releaseWithCoverArt) {
+          console.log("Found release with cover art:", {
+            id: releaseWithCoverArt.release.id,
+            title: releaseWithCoverArt.release.title,
+            date: releaseWithCoverArt.release.date,
+            country: releaseWithCoverArt.release.country,
+          });
+
+          return {
+            ...releaseWithCoverArt.release,
+            allReleases: data.releases,
+          };
+        }
+
+        // If no release has cover art, return the first one with earliest date info
+        const release = data.releases[0];
+        const earliestRelease = data.releases
+          .filter((r: any) => r.date)
+          .sort((a: any, b: any) => a.date.localeCompare(b.date))[0];
+
+        console.log("No cover art found, using first release:", {
+          id: release.id,
+          title: release.title,
+          date: release.date,
+          country: release.country,
+          earliestDate: earliestRelease?.date,
         });
 
         return {
-          ...releaseWithCoverArt.release,
+          ...release,
           allReleases: data.releases,
         };
       }
 
-      // If no release has cover art, return the first one with earliest date info
-      const release = data.releases[0];
-      const earliestRelease = data.releases
-        .filter((r: any) => r.date)
-        .sort((a: any, b: any) => a.date.localeCompare(b.date))[0];
+      console.log("No album found for:", albumName, artistName);
+      return null;
+    } catch (error) {
+      console.error(`MusicBrainz fetch attempt ${attempt} failed:`, error);
+      
+      if (attempt === retries) {
+        console.error("Max retries exceeded for MusicBrainz fetch");
+        return null;
+      }
 
-      console.log("No cover art found, using first release:", {
-        id: release.id,
-        title: release.title,
-        date: release.date,
-        country: release.country,
-        earliestDate: earliestRelease?.date,
-      });
-
-      return {
-        ...release,
-        allReleases: data.releases,
-      };
+      // Exponential backoff with jitter: 2-3s, 4-6s, 8-12s, 16-24s, 32-48s
+      const baseDelay = Math.pow(2, attempt) * 1000;
+      const jitter = Math.random() * baseDelay;
+      const delay = baseDelay + jitter;
+      console.log(`Retrying MusicBrainz in ${Math.round(delay)}ms...`);
+      await new Promise((resolve) => setTimeout(resolve, delay));
     }
-
-    console.log("No album found for:", albumName, artistName);
-    return null;
-  } catch (error) {
-    console.error("Error fetching from MusicBrainz:", error);
-    return null;
   }
+  return null;
 };
 
 const checkCoverArtExists = async (releaseId: string): Promise<boolean> => {
