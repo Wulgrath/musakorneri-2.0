@@ -41,12 +41,14 @@ export function TopToolbar() {
   return (
     <>
       {/* Desktop/Tablet Navigation */}
-      <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 px-4 py-3">
+      <div className="sticky top-0 z-50 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 px-4 py-3">
         <div className="flex items-center justify-between max-w-7xl mx-auto">
           <div className="flex items-center space-x-8">
-            <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
-              Musakorneri
-            </h1>
+            <Link href="/">
+              <h1 className="text-xl font-semibold text-gray-900 dark:text-white cursor-pointer">
+                Musakorneri
+              </h1>
+            </Link>
             {/* Desktop Navigation */}
             <nav className="hidden md:flex space-x-4">
               <Link href="/" className="nav-link">
