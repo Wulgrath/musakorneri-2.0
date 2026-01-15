@@ -46,7 +46,7 @@ export const AlbumsListItem = ({
     <div className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-visible">
       <div className="flex items-center h-full px-2 py-1">
         <div
-          className={`w-16 h-16 sm:w-24 sm:h-24 flex-shrink-0 ml-2 flex items-center justify-center ${
+          className={`w-20 h-20 sm:w-32 sm:h-32 flex-shrink-0 ml-2 flex items-center justify-center ${
             imageError ? "border border-gray-300 dark:border-gray-600" : ""
           }`}
         >
