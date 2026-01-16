@@ -90,8 +90,19 @@ const fetchAlbumDataFromMusicBrainz = async (
       const data: any = await response.json();
 
       if (data.releases && data.releases.length > 0) {
-        // Check first 3 releases in parallel for cover art
-        const releasesToCheck = data.releases.slice(0, 3);
+        // Prioritize by release type: Album > EP > others
+        const prioritizedReleases = data.releases.sort((a: any, b: any) => {
+          const getTypePriority = (release: any) => {
+            const type = release["release-group"]?.["primary-type"];
+            if (type === "Album") return 1;
+            if (type === "EP") return 2;
+            return 3;
+          };
+          return getTypePriority(a) - getTypePriority(b);
+        });
+
+        // Check first 3 prioritized releases for cover art
+        const releasesToCheck = prioritizedReleases.slice(0, 3);
         const coverArtChecks = releasesToCheck.map(async (release: any) => ({
           release,
           hasCoverArt: await checkCoverArtExists(release.id),
@@ -105,7 +116,7 @@ const fetchAlbumDataFromMusicBrainz = async (
             id: releaseWithCoverArt.release.id,
             title: releaseWithCoverArt.release.title,
             date: releaseWithCoverArt.release.date,
-            country: releaseWithCoverArt.release.country,
+            type: releaseWithCoverArt.release["release-group"]?.["primary-type"],
           });
 
           return {
@@ -114,18 +125,17 @@ const fetchAlbumDataFromMusicBrainz = async (
           };
         }
 
-        // If no release has cover art, return the first one with earliest date info
-        const release = data.releases[0];
+        // If no release has cover art, return the first prioritized one
+        const release = prioritizedReleases[0];
         const earliestRelease = data.releases
           .filter((r: any) => r.date)
           .sort((a: any, b: any) => a.date.localeCompare(b.date))[0];
 
-        console.log("No cover art found, using first release:", {
+        console.log("No cover art found, using first prioritized release:", {
           id: release.id,
           title: release.title,
           date: release.date,
-          country: release.country,
-          earliestDate: earliestRelease?.date,
+          type: release["release-group"]?.["primary-type"],
         });
 
         return {

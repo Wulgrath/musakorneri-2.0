@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Album, Artist, AlbumReview } from "@/types";
 import { useUpdateAlbumReviewMutation } from "@/app/store/api/reviews.api";
+import Link from "next/link";
 
 interface AlbumsListItemProps {
   album: Album;
@@ -46,7 +47,7 @@ export const AlbumsListItem = ({
     <div className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-visible">
       <div className="flex items-center h-full px-2 py-1">
         <div
-          className={`w-20 h-20 sm:w-32 sm:h-32 flex-shrink-0 ml-2 flex items-center justify-center ${
+          className={`w-20 h-20 sm:w-24 sm:h-24 flex-shrink-0 ml-2 flex items-center justify-center ${
             imageError ? "border border-gray-300 dark:border-gray-600" : ""
           }`}
         >
@@ -65,7 +66,7 @@ export const AlbumsListItem = ({
             </span>
           )}
         </div>
-        <div className="flex-1 p-2 sm:p-4 flex flex-col justify-center min-w-0">
+        <div className="flex-1 py-2 px-3 sm:py-2 sm:px-3 flex flex-col justify-center min-w-0">
           <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white truncate">
             {album.name}
             {album.year && (
@@ -74,15 +75,21 @@ export const AlbumsListItem = ({
               </span>
             )}
           </h3>
+
           <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 truncate">
-            {artist?.name}
+            <Link
+              href={`/artist?id=${artist?.id}`}
+              className="hover:text-blue-500 dark:hover:text-blue-400 transition-colors"
+            >
+              {artist?.name}
+            </Link>
           </p>
           <div className="flex flex-wrap gap-2 sm:gap-4 mt-1 sm:mt-2 items-center">
             {album.reviewScore && (
               <>
-                <div className="flex flex-col items-center justify-center bg-gray-100 dark:bg-gray-800 rounded w-14 h-10 sm:w-16 sm:h-12">
+                <div className="flex flex-col items-center justify-center bg-gray-100 dark:bg-gray-800 rounded w-12 h-9 sm:w-14 sm:h-10">
                   <span
-                    className="text-xl sm:text-2xl font-bold"
+                    className="text-lg sm:text-xl font-bold"
                     style={{
                       color: `hsl(${
                         ((album.reviewScore - 1) / 4) * 120
@@ -107,12 +114,12 @@ export const AlbumsListItem = ({
             {"Your score:"}
           </span>
           <div
-            className="flex items-center justify-center bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg w-16 h-14 sm:w-20 sm:h-16 cursor-pointer transition-colors"
+            className="flex items-center justify-center bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg w-16 h-14 sm:w-16 sm:h-14 cursor-pointer transition-colors"
             onClick={() => setShowDropdown(!showDropdown)}
           >
             {userReview ? (
               <span
-                className="text-2xl sm:text-3xl font-bold"
+                className="text-2xl sm:text-2xl font-bold"
                 style={{
                   color: `hsl(${((userReview.score - 1) / 4) * 120}, 50%, 45%)`,
                 }}
@@ -120,7 +127,7 @@ export const AlbumsListItem = ({
                 {userReview.score}
               </span>
             ) : (
-              <span className="text-2xl sm:text-3xl font-bold text-gray-400 dark:text-gray-500">
+              <span className="text-2xl sm:text-2xl font-bold text-gray-400 dark:text-gray-500">
                 –
               </span>
             )}

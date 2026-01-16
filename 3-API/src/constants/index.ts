@@ -12,6 +12,8 @@ export const MUSAKORNERI_ALBUMS_TABLE = "musakorneri-albums-table";
 export const MUSAKORNERI_ALBUMS_TABLE_YEAR_REVIEW_SCORE_INDEX =
   "year-reviewScore-index";
 
+export const MUSAKORNERI_ALBUMS_TABLE_ARTIST_ID_INDEX = "artistId-index";
+
 export const MUSAKORNERI_ALBUM_REVIEWS_TABLE =
   "musakorneri-album-reviews-table";
 
@@ -20,3 +22,5 @@ export const MUSAKORNERI_ALBUM_REVIEWS_TABLE_CREATED_AT_INDEX =
 
 export const MUSAKORNERI_ALBUM_REVIEWS_USER_ID_ALBUM_ID_INDEX =
   "userId-albumId-index";
+
+export const MUSAKORNERI_ALBUM_REVIEWS_TABLE_ARTIST_ID_INDEX = "artistId-index";

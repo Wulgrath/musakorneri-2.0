@@ -1,7 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { signIn, confirmSignUp, resendConfirmationCode } from "../../../lib/auth";
+import {
+  signIn,
+  confirmSignUp,
+  resendConfirmationCode,
+} from "../../../lib/auth";
 
 export const Login = () => {
   const [email, setEmail] = useState("");
@@ -10,26 +14,26 @@ export const Login = () => {
   const [needsConfirmation, setNeedsConfirmation] = useState(false);
   const [confirmationCode, setConfirmationCode] = useState("");
 
-  const handleLogin = async (e) => {
+  const handleLogin = async (e: any) => {
     e.preventDefault();
     try {
       const result = await signIn(email, password);
-      if (result.AuthenticationResult) {
+      if (result.AuthenticationResult?.AccessToken) {
         setMessage("Login successful!");
         localStorage.setItem(
           "accessToken",
-          result.AuthenticationResult.AccessToken
+          result.AuthenticationResult.AccessToken,
         );
         if (result.AuthenticationResult.RefreshToken) {
           localStorage.setItem(
             "refreshToken",
-            result.AuthenticationResult.RefreshToken
+            result.AuthenticationResult.RefreshToken,
           );
         }
         window.location.href = "/";
       }
-    } catch (error) {
-      if (error.name === 'UserNotConfirmedException') {
+    } catch (error: any) {
+      if (error.name === "UserNotConfirmedException") {
         setNeedsConfirmation(true);
         setMessage("Please confirm your email address first.");
       } else {
@@ -38,28 +42,28 @@ export const Login = () => {
     }
   };
 
-  const handleConfirm = async (e) => {
+  const handleConfirm = async (e: any) => {
     e.preventDefault();
     try {
       await confirmSignUp(email, confirmationCode);
-      
+
       // Automatically log in after confirmation
       const result = await signIn(email, password);
-      if (result.AuthenticationResult) {
+      if (result.AuthenticationResult?.AccessToken) {
         setMessage("Account confirmed and logged in!");
         localStorage.setItem(
           "accessToken",
-          result.AuthenticationResult.AccessToken
+          result.AuthenticationResult.AccessToken,
         );
         if (result.AuthenticationResult.RefreshToken) {
           localStorage.setItem(
             "refreshToken",
-            result.AuthenticationResult.RefreshToken
+            result.AuthenticationResult.RefreshToken,
           );
         }
         window.location.href = "/";
       }
-    } catch (error) {
+    } catch (error: any) {
       setMessage(error.message);
     }
   };
@@ -68,7 +72,7 @@ export const Login = () => {
     try {
       await resendConfirmationCode(email);
       setMessage("Confirmation code sent to your email");
-    } catch (error) {
+    } catch (error: any) {
       setMessage(error.message);
     }
   };

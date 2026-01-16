@@ -9,11 +9,13 @@ export const RecentAlbumReviews = () => {
 
   if (error) return <div>Error loading recent reviews</div>;
 
-  const albumReviews = data?.albumReviews ? orderBy(data.albumReviews, ['createdAt'], ['desc']) : [];
+  const albumReviews = data?.albumReviews
+    ? orderBy(data.albumReviews, ["createdAt"], ["desc"])
+    : [];
 
   return (
     <section>
-      <h2 className="text-2xl font-semibold mb-4">Recent album reviews</h2>
+      <h2 className="text-2xl font-semibold mb-4">Recent reviews</h2>
 
       {isLoading ? (
         <div>Loading...</div>

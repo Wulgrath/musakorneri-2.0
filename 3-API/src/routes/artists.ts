@@ -1,8 +1,8 @@
 import Router from "@koa/router";
-import { getAllArtists } from "../controllers/artists";
+import { getArtistData } from "../controllers/artists/get-artist-data.controller";
 
 const router = new Router();
 
-router.get("/", getAllArtists);
+router.get("/:artistId/artist-data", getArtistData);
 
 export default router;

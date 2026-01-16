@@ -9,7 +9,7 @@ export const Home = () => {
     .slice(0, 6);
 
   return (
-    <div className="p-4 space-y-8">
+    <div className="p-3 space-y-8">
       <RecentAlbumReviews />
 
       {/* <section>
