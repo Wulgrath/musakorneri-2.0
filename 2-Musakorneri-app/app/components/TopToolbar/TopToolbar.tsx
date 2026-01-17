@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { MobileSidebar } from "./MobileSidebar/MobileSidebar";
 import { SearchInput } from "./SearchInput/SearchInput";
+import { AccountCircle, ArrowDropDown } from "@mui/icons-material";
 
 export function TopToolbar() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -78,9 +79,10 @@ export function TopToolbar() {
                 <div className="relative" ref={dropdownRef}>
                   <button
                     onClick={() => setDropdownOpen(!dropdownOpen)}
-                    className="nav-link flex items-center"
+                    className="nav-link flex items-center p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors cursor-pointer"
                   >
-                    Account ▼
+                    <AccountCircle />
+                    <ArrowDropDown />
                   </button>
                   {dropdownOpen && (
                     <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-md shadow-lg z-50">

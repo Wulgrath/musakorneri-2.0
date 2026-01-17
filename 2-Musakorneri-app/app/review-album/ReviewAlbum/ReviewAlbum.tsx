@@ -1,8 +1,8 @@
 "use client";
-
-import { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useCreateReviewMutation } from "../../store/api/reviews.api";
 import { useGetArtistsBaseDataQuery } from "../../store/api/artists.api";
+import { ALBUM_SCORE_OPTIONS } from "@/app/constants/album-score-options";
 
 export const ReviewAlbum = () => {
   const [artist, setArtist] = useState("");
@@ -10,6 +10,7 @@ export const ReviewAlbum = () => {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [albumName, setAlbumName] = useState("");
   const [score, setScore] = useState(1);
+  const [reviewText, setReviewText] = useState("");
   const [error, setError] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
   const suggestionsRef = useRef<HTMLDivElement>(null);
@@ -64,11 +65,12 @@ export const ReviewAlbum = () => {
     setError("");
 
     try {
-      await createReview({ artist, albumName, score }).unwrap();
+      await createReview({ artist, albumName, score, reviewText }).unwrap();
       // Reset form on success
       setArtist("");
       setAlbumName("");
       setScore(1);
+      setReviewText("");
     } catch (error: any) {
       if (error.status === 401) {
         setError("You must be logged in to submit a review.");
@@ -132,12 +134,25 @@ export const ReviewAlbum = () => {
             onChange={(e) => setScore(Number(e.target.value))}
             className="w-full p-2 border rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
           >
-            {[1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5].map((num) => (
-              <option key={num} value={num}>
-                {num}
+            {ALBUM_SCORE_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
               </option>
             ))}
           </select>
+        </div>
+        <div>
+          <label className="block mb-2">Text review (optional):</label>
+          <textarea
+            placeholder="Write your review..."
+            value={reviewText}
+            onChange={(e) => setReviewText(e.target.value.slice(0, 140))}
+            maxLength={140}
+            className="w-full p-2 border rounded resize-none h-30"
+          />
+          <div className="text-sm text-gray-500 text-right">
+            {reviewText.length}/140
+          </div>
         </div>
         <button
           type="submit"

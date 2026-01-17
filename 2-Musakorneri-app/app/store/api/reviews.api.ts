@@ -9,6 +9,7 @@ import { addAlbums } from "../albums/albumsSlice";
 import { addArtists } from "../artists/artistsSlice";
 import { addUsers } from "../users/usersSlice";
 import { addReviews, updateReview } from "../reviews/reviewsSlice";
+import toast from "react-hot-toast";
 
 export const reviewsApi = api.injectEndpoints({
   endpoints: (builder) => ({
@@ -19,6 +20,14 @@ export const reviewsApi = api.injectEndpoints({
         body: reviewData,
       }),
       invalidatesTags: ["Album", "Artist", "AlbumReview"],
+      onQueryStarted: async (arg, { queryFulfilled }) => {
+        try {
+          await queryFulfilled;
+          toast.success("Review submitted successfully!");
+        } catch {
+          toast.error("Failed to submit review");
+        }
+      },
     }),
     updateAlbumReview: builder.mutation<
       { albumReview: AlbumReview },
@@ -34,7 +43,12 @@ export const reviewsApi = api.injectEndpoints({
         try {
           const { data } = await queryFulfilled;
           if (data.albumReview) {
-            dispatch(updateReview({ id: data.albumReview.id, changes: data.albumReview }));
+            dispatch(
+              updateReview({
+                id: data.albumReview.id,
+                changes: data.albumReview,
+              }),
+            );
           }
         } catch {}
       },

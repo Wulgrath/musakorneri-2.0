@@ -4,6 +4,8 @@ import { useState } from "react";
 import { useSelector } from "react-redux";
 import { selectAlbumById } from "../../../../store/albums/selectors/albums.selectors";
 import { selectArtistById } from "../../../../store/artists/selectors/artists.selectors";
+import Image from "next/image";
+import dayjs from "dayjs";
 
 export const ReviewCard = ({ review }) => {
   const [imageError, setImageError] = useState(false);
@@ -12,6 +14,22 @@ export const ReviewCard = ({ review }) => {
     selectArtistById(state, review.artistId),
   );
   const user = useSelector((state) => selectUserById(state, review.userId));
+
+  const getDateDisplay = (dateString) => {
+    const reviewDate = new Date(dateString);
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    const isSameDay = (date1, date2) =>
+      date1.getDate() === date2.getDate() &&
+      date1.getMonth() === date2.getMonth() &&
+      date1.getFullYear() === date2.getFullYear();
+
+    if (isSameDay(reviewDate, today)) return "Today";
+    if (isSameDay(reviewDate, yesterday)) return "Yesterday";
+    return dayjs(reviewDate).format("DD.MM.YYYY");
+  };
 
   return (
     <div className="bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-shadow border border-gray-700 overflow-hidden relative">
@@ -33,20 +51,14 @@ export const ReviewCard = ({ review }) => {
             imageError ? "border border-gray-600" : ""
           }`}
         >
-          <img
+          <Image
             src={`https://musakorneri-files.s3.amazonaws.com/album-covers/thumbs/${album?.id}.jpg`}
             alt={`${album?.name || "Unknown Album"} cover`}
-            className="w-full h-full object-contain"
-            onError={(e) => {
-              e.target.style.display = "none";
-              setImageError(true);
-            }}
+            width={96}
+            height={96}
+            className="object-contain"
+            onError={() => setImageError(true)}
           />
-          {imageError && (
-            <span className="text-xs text-gray-400 text-center px-1">
-              Missing cover art
-            </span>
-          )}
         </div>
         <div className="flex-1 p-4 pr-20 flex flex-col justify-center">
           <h3 className="font-semibold text-lg text-white">
@@ -67,7 +79,7 @@ export const ReviewCard = ({ review }) => {
       <div className="absolute bottom-2 right-2">
         <span className="text-sm text-gray-400">
           {user?.username || "Unknown User"} •{" "}
-          {new Date(review.createdAt).toLocaleDateString("en-GB")}
+          {getDateDisplay(review.createdAt)}
         </span>
       </div>
     </div>

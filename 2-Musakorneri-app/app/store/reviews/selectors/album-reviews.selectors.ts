@@ -5,7 +5,7 @@ import { reviewsAdapter } from "../reviewsSlice";
 
 // Get the selectors from the adapter
 const adapterSelectors = reviewsAdapter.getSelectors(
-  (state: RootState) => state.reviews
+  (state: RootState) => state.reviews,
 );
 
 // Export the basic selectors
@@ -18,8 +18,6 @@ export const selectAlbumTotal = adapterSelectors.selectTotal;
 export const selectCurrentUserAlbumReviews = createSelector(
   [selectAllAlbumReviews, selectCurrentUserId],
   (albumReviews, currentUserId) => {
-    console.log("Selector - albumReviews:", albumReviews);
-    console.log("Selector - currentUserId:", currentUserId);
     return albumReviews.filter((review) => review.userId === currentUserId);
-  }
+  },
 );

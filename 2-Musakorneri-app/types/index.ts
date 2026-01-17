@@ -19,6 +19,7 @@ export interface AlbumReview {
   score: number;
   createdAt: string;
   createdAtYearMonth: string;
+  reviewText?: string;
 }
 
 export interface User {
@@ -55,4 +56,5 @@ export interface ReviewAlbumRequest {
   artist: string;
   albumName: string;
   score: number;
+  reviewText?: string;
 }

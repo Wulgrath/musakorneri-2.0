@@ -19,7 +19,7 @@ const ReleaseCard = ({ album }: { album: Album }) => {
     <div className="bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-shadow border border-gray-700 overflow-hidden relative">
       {album?.reviewScore && (
         <div className="absolute right-2 top-1/2 transform -translate-y-1/2 z-10">
-          <div className="flex items-center justify-center bg-gray-700 rounded w-16 h-12">
+          <div className="flex flex-col items-center justify-center bg-gray-700 rounded px-2 py-1">
             <span
               className="text-2xl font-bold"
               style={{
@@ -27,6 +27,9 @@ const ReleaseCard = ({ album }: { album: Album }) => {
               }}
             >
               {album.reviewScore}
+            </span>
+            <span className="text-xs text-gray-400">
+              {album.reviewCount || 0} reviews
             </span>
           </div>
         </div>
@@ -75,8 +78,9 @@ export const TopRecentReleases = () => {
 
   return (
     <section>
-      <h2 className="text-2xl font-semibold mb-4 hidden lg:block">Top Recent Releases</h2>
-
+      <h2 className="text-2xl font-semibold mb-4 hidden lg:block">
+        Top Recent Releases
+      </h2>
       {recentReleases.length > 0 ? (
         <div className="space-y-4">
           {recentReleases.map((release) => (

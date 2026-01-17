@@ -1,3 +1,4 @@
+import toast from "react-hot-toast";
 import { api } from "../api";
 import { setCurrentUser } from "../currentUser/currentUserSlice";
 
@@ -27,6 +28,13 @@ export const usersApi = api.injectEndpoints({
         body: { newUsername: username },
       }),
       invalidatesTags: ["User"],
+      onQueryStarted: async (arg, { dispatch, queryFulfilled }) => {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(setCurrentUser(data));
+          toast.success("Username updated successfully!");
+        } catch {}
+      },
     }),
   }),
   overrideExisting: true,

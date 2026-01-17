@@ -4,13 +4,14 @@ import { dynamodbScanAlbums } from "../../services/dynamodb/albums/dynamodb-scan
 import { dynamodbPutNewArtist } from "../../services/dynamodb/artists/dynamodb-put-new-artist.service";
 import { dynamodbScanArtists } from "../../services/dynamodb/artists/dynamodb-scan-artists.service";
 import { dynamodbPutNewAlbumReview } from "../../services/dynamodb/reviews/dynamodb-put-new-album-review.service";
+import { dynamodbQueryAlbumReviewByUserIdAndAlbumId } from "../../services/dynamodb/reviews/dynamodb-query-album-review-by-user-id-and-album-id.service";
+import { dynamodbUpdateAlbumReviewData } from "../../services/dynamodb/reviews/dynamodb-update-album-review-data.service";
 import { Album } from "../../types";
-import { create } from "lodash";
 
 export const addAndReviewAlbum = async (ctx: Context): Promise<void> => {
   const userId = ctx.state.userId;
 
-  const { artist, albumName, year, score } = ctx.request.body;
+  const { artist, albumName, year, score, reviewText } = ctx.request.body;
 
   const [existingArtists, existingAlbums] = await Promise.all([
     dynamodbScanArtists(),
@@ -19,7 +20,7 @@ export const addAndReviewAlbum = async (ctx: Context): Promise<void> => {
 
   const alreadyExistingArtist = existingArtists?.find(
     (existingArtist: any) =>
-      existingArtist.name.toLowerCase() === artist.toLowerCase()
+      existingArtist.name.toLowerCase() === artist.toLowerCase(),
   );
 
   const now = new Date().toISOString();
@@ -52,17 +53,18 @@ export const addAndReviewAlbum = async (ctx: Context): Promise<void> => {
       createdAt: now,
       createdAtYearMonth: now.slice(0, 7),
       artistId: newArtist.id,
+      reviewText,
     };
 
     await dynamodbPutNewAlbumReview(newAlbumReview);
   } else {
-    const isAlreadyExistingAlbum = existingAlbums?.find(
+    const alreadyExistingAlbum = existingAlbums?.find(
       (album: any) =>
         album.name.toLowerCase() === albumName.toLowerCase() &&
-        album.artistId === alreadyExistingArtist.id
+        album.artistId === alreadyExistingArtist.id,
     );
 
-    if (!isAlreadyExistingAlbum) {
+    if (!alreadyExistingAlbum) {
       const newAlbum: Album = {
         id: crypto.randomUUID(),
         artistId: alreadyExistingArtist.id,
@@ -81,21 +83,37 @@ export const addAndReviewAlbum = async (ctx: Context): Promise<void> => {
         createdAt: now,
         createdAtYearMonth: now.slice(0, 7),
         artistId: alreadyExistingArtist.id,
+        reviewText,
       };
 
       await dynamodbPutNewAlbumReview(newAlbumReview);
     } else {
-      const newAlbumReview = {
-        id: crypto.randomUUID(),
-        albumId: isAlreadyExistingAlbum.id,
-        userId,
-        score,
-        createdAt: now,
-        createdAtYearMonth: now.slice(0, 7),
-        artistId: alreadyExistingArtist.id,
-      };
+      const existingReviewForAlbum =
+        await dynamodbQueryAlbumReviewByUserIdAndAlbumId(
+          userId,
+          alreadyExistingAlbum.id,
+        );
 
-      await dynamodbPutNewAlbumReview(newAlbumReview);
+      if (!existingReviewForAlbum) {
+        const newAlbumReview = {
+          id: crypto.randomUUID(),
+          albumId: alreadyExistingAlbum.id,
+          userId,
+          score,
+          createdAt: now,
+          createdAtYearMonth: now.slice(0, 7),
+          artistId: alreadyExistingArtist.id,
+          reviewText,
+        };
+
+        await dynamodbPutNewAlbumReview(newAlbumReview);
+      } else {
+        await dynamodbUpdateAlbumReviewData(
+          existingReviewForAlbum.id,
+          score,
+          reviewText,
+        );
+      }
     }
   }
 

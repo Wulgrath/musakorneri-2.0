@@ -4,14 +4,14 @@ import { useState, useRef, useEffect } from "react";
 import { Album, Artist, AlbumReview } from "@/types";
 import { useUpdateAlbumReviewMutation } from "@/app/store/api/reviews.api";
 import Link from "next/link";
+import Image from "next/image";
+import { ALBUM_SCORE_OPTIONS } from "@/app/constants/album-score-options";
 
 interface AlbumsListItemProps {
   album: Album;
   artist?: Artist;
   userReview?: AlbumReview;
 }
-
-const SCORE_OPTIONS = [1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5];
 
 export const AlbumsListItem = ({
   album,
@@ -51,14 +51,13 @@ export const AlbumsListItem = ({
             imageError ? "border border-gray-300 dark:border-gray-600" : ""
           }`}
         >
-          <img
-            src={`https://musakorneri-files.s3.amazonaws.com/album-covers/thumbs/${album.id}.jpg`}
-            alt={`${album.name} cover`}
-            className="w-full h-full object-contain"
-            onError={(e) => {
-              e.currentTarget.style.display = "none";
-              setImageError(true);
-            }}
+          <Image
+            src={`https://musakorneri-files.s3.amazonaws.com/album-covers/thumbs/${album?.id}.jpg`}
+            alt={`${album?.name || "Unknown Album"} cover`}
+            width={96}
+            height={96}
+            className="object-contain"
+            onError={() => setImageError(true)}
           />
           {imageError && (
             <span className="text-xs text-gray-400 dark:text-gray-500 text-center px-1">
@@ -100,7 +99,7 @@ export const AlbumsListItem = ({
                   </span>
                 </div>
                 <span className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
-                  ({album.reviewCount || 0} reviews)
+                  {album.reviewCount || 0} reviews
                 </span>
               </>
             )}
@@ -133,20 +132,20 @@ export const AlbumsListItem = ({
             )}
           </div>
           {showDropdown && (
-            <div className="absolute top-full mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg z-10 py-1">
-              {SCORE_OPTIONS.map((score) => (
+            <div className="absolute top-full right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg z-10 py-1">
+              {ALBUM_SCORE_OPTIONS.map((score) => (
                 <button
-                  key={score}
-                  onClick={() => handleScoreChange(score)}
-                  className="w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                  key={score.value}
+                  onClick={() => handleScoreChange(score.value)}
+                  className="block w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors whitespace-nowrap"
                 >
                   <span
                     className="font-bold"
                     style={{
-                      color: `hsl(${((score - 1) / 4) * 120}, 50%, 45%)`,
+                      color: `hsl(${((score.value - 1) / 4) * 120}, 50%, 45%)`,
                     }}
                   >
-                    {score}
+                    {score.label}
                   </span>
                 </button>
               ))}

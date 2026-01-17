@@ -5,6 +5,7 @@ import { TopToolbar } from "./components/TopToolbar/TopToolbar";
 import { Footer } from "./components/Footer/Footer";
 import "./globals.css";
 import React from "react";
+import { Toaster } from "react-hot-toast";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -35,6 +36,18 @@ export default function RootLayout({
           <TopToolbar />
           <div className="max-w-7xl mx-auto flex-1 w-full">
             {children}
+            <Toaster 
+              position="top-center"
+              containerStyle={{
+                top: 80,
+              }}
+              toastOptions={{
+                style: {
+                  background: '#1f2937',
+                  color: '#f9fafb',
+                },
+              }}
+            />
           </div>
           <Footer />
         </ReduxProvider>
