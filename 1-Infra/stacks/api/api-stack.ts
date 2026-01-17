@@ -15,32 +15,38 @@ export class ApiStack extends cdk.Stack {
     const userPool = cognito.UserPool.fromUserPoolId(
       this,
       "ImportedUserPool",
-      cdk.Fn.importValue("MusakorneriUserPoolId")
+      cdk.Fn.importValue("MusakorneriUserPoolId"),
     );
 
     // Import tables from DynamoDB stack
     const albumsTable = dynamodb.Table.fromTableArn(
       this,
       "ImportedAlbumsTable",
-      cdk.Fn.importValue("MusakorneriAlbumsTableArn")
+      cdk.Fn.importValue("MusakorneriAlbumsTableArn"),
     );
 
     const artistsTable = dynamodb.Table.fromTableArn(
       this,
       "ImportedArtistsTable",
-      cdk.Fn.importValue("MusakorneriArtistsTableArn")
+      cdk.Fn.importValue("MusakorneriArtistsTableArn"),
     );
 
     const usersTable = dynamodb.Table.fromTableArn(
       this,
       "ImportedUsersTable",
-      cdk.Fn.importValue("MusakorneriUsersTableArn")
+      cdk.Fn.importValue("MusakorneriUsersTableArn"),
     );
 
     const albumReviewsTable = dynamodb.Table.fromTableArn(
       this,
       "ImportedAlbumReviewsTable",
-      cdk.Fn.importValue("MusakorneriAlbumReviewsTableArn")
+      cdk.Fn.importValue("MusakorneriAlbumReviewsTableArn"),
+    );
+
+    const aotyTable = dynamodb.Table.fromTableArn(
+      this,
+      "ImportedAotyTable",
+      cdk.Fn.importValue("MusakorneriAotyTableArn"),
     );
 
     // Single Koa API Lambda
@@ -61,22 +67,24 @@ export class ApiStack extends cdk.Stack {
       new iam.PolicyStatement({
         effect: iam.Effect.ALLOW,
         actions: [
-          'dynamodb:GetItem',
-          'dynamodb:PutItem',
-          'dynamodb:UpdateItem',
-          'dynamodb:DeleteItem',
-          'dynamodb:BatchGetItem',
-          'dynamodb:BatchWriteItem',
-          'dynamodb:Query',
-          'dynamodb:Scan'
+          "dynamodb:GetItem",
+          "dynamodb:PutItem",
+          "dynamodb:UpdateItem",
+          "dynamodb:DeleteItem",
+          "dynamodb:BatchGetItem",
+          "dynamodb:BatchWriteItem",
+          "dynamodb:Query",
+          "dynamodb:Scan",
         ],
         resources: [
           albumsTable.tableArn,
           `${albumsTable.tableArn}/index/*`,
           albumReviewsTable.tableArn,
-          `${albumReviewsTable.tableArn}/index/*`
-        ]
-      })
+          `${albumReviewsTable.tableArn}/index/*`,
+          aotyTable.tableArn,
+          `${aotyTable.tableArn}/index/*`,
+        ],
+      }),
     );
     artistsTable.grantReadWriteData(apiLambda);
     usersTable.grantReadWriteData(apiLambda);
@@ -103,7 +111,7 @@ export class ApiStack extends cdk.Stack {
       methods: [apigatewayv2.HttpMethod.ANY],
       integration: new integrations.HttpLambdaIntegration(
         "LambdaIntegration",
-        apiLambda
+        apiLambda,
       ),
     });
 

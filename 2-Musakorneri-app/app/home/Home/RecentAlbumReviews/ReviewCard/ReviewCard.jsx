@@ -6,6 +6,7 @@ import { selectAlbumById } from "../../../../store/albums/selectors/albums.selec
 import { selectArtistById } from "../../../../store/artists/selectors/artists.selectors";
 import Image from "next/image";
 import dayjs from "dayjs";
+import CameraAltIcon from "@mui/icons-material/CameraAlt";
 
 export const ReviewCard = ({ review }) => {
   const [imageError, setImageError] = useState(false);
@@ -46,19 +47,19 @@ export const ReviewCard = ({ review }) => {
         </div>
       </div>
       <div className="flex items-center h-full">
-        <div
-          className={`w-24 h-24 flex items-center justify-center flex-shrink-0 ml-2 ${
-            imageError ? "border border-gray-600" : ""
-          }`}
-        >
-          <Image
-            src={`https://musakorneri-files.s3.amazonaws.com/album-covers/thumbs/${album?.id}.jpg`}
-            alt={`${album?.name || "Unknown Album"} cover`}
-            width={96}
-            height={96}
-            className="object-contain"
-            onError={() => setImageError(true)}
-          />
+        <div className="w-24 h-24 flex items-center justify-center flex-shrink-0 ml-2 bg-gray-700 rounded">
+          {imageError ? (
+            <CameraAltIcon className="text-gray-500" sx={{ fontSize: 48 }} />
+          ) : (
+            <Image
+              src={`https://musakorneri-files.s3.amazonaws.com/album-covers/thumbs/${album?.id}.jpg`}
+              alt={`${album?.name || "Unknown Album"} cover`}
+              width={96}
+              height={96}
+              className="object-contain"
+              onError={() => setImageError(true)}
+            />
+          )}
         </div>
         <div className="flex-1 p-4 pr-20 flex flex-col justify-center">
           <h3 className="font-semibold text-lg text-white">

@@ -24,3 +24,5 @@ export const MUSAKORNERI_ALBUM_REVIEWS_USER_ID_ALBUM_ID_INDEX =
   "userId-albumId-index";
 
 export const MUSAKORNERI_ALBUM_REVIEWS_TABLE_ARTIST_ID_INDEX = "artistId-index";
+
+export const MUSAKORNERI_AOTY_TABLE = "musakorneri-aoty-table";

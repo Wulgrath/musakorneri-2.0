@@ -1,12 +1,13 @@
 import toast from "react-hot-toast";
 import { api } from "../api";
 import { setCurrentUser } from "../currentUser/currentUserSlice";
+import { Album, AlbumReview, AotyItem, User } from "@/types";
 
-export interface User {
-  id: string;
-  username: string;
-  email: string;
-  createdAt: string;
+interface UserPageData {
+  user: User;
+  albumReviews: AlbumReview[];
+  albums: Album[];
+  aotyItems: AotyItem[];
 }
 
 export const usersApi = api.injectEndpoints({
@@ -36,8 +37,21 @@ export const usersApi = api.injectEndpoints({
         } catch {}
       },
     }),
+    getUserPageData: builder.query<UserPageData, string>({
+      query: (userId: string) => `users/${userId}/get-user-data`,
+      onQueryStarted: async (arg, { dispatch, queryFulfilled }) => {
+        try {
+          const { data } = await queryFulfilled;
+          // dispatch(setCurrentUser(data));
+        } catch {}
+      },
+    }),
   }),
   overrideExisting: true,
 });
 
-export const { useGetCurrentUserQuery, useUpdateUsernameMutation } = usersApi;
+export const {
+  useGetCurrentUserQuery,
+  useUpdateUsernameMutation,
+  useGetUserPageDataQuery,
+} = usersApi;

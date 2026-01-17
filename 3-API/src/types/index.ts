@@ -2,8 +2,9 @@ export interface Album {
   id: string;
   name: string;
   artistId: string;
-  year?: string;
+  releaseDate?: string;
   createdAt: string;
+  year?: string;
 }
 
 export interface Artist {
@@ -49,4 +50,11 @@ export interface CreateUserRequest {
   id?: string;
   username: string;
   email: string;
+}
+
+export interface AotyItem {
+  userId: string;
+  year: string;
+  albumId: string;
+  artistId?: string;
 }

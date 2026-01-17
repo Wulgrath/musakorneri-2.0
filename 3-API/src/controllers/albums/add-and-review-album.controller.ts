@@ -6,12 +6,20 @@ import { dynamodbScanArtists } from "../../services/dynamodb/artists/dynamodb-sc
 import { dynamodbPutNewAlbumReview } from "../../services/dynamodb/reviews/dynamodb-put-new-album-review.service";
 import { dynamodbQueryAlbumReviewByUserIdAndAlbumId } from "../../services/dynamodb/reviews/dynamodb-query-album-review-by-user-id-and-album-id.service";
 import { dynamodbUpdateAlbumReviewData } from "../../services/dynamodb/reviews/dynamodb-update-album-review-data.service";
-import { Album } from "../../types";
+import { Album, AlbumReview } from "../../types";
 
 export const addAndReviewAlbum = async (ctx: Context): Promise<void> => {
   const userId = ctx.state.userId;
 
-  const { artist, albumName, year, score, reviewText } = ctx.request.body;
+  const { artist, albumName, score, reviewText } = ctx.request.body;
+
+  if (!artist || !albumName || score === undefined) {
+    ctx.status = 400;
+    ctx.body = {
+      error: "Missing required fields: artist, albumName, score",
+    };
+    return;
+  }
 
   const [existingArtists, existingAlbums] = await Promise.all([
     dynamodbScanArtists(),
@@ -39,13 +47,12 @@ export const addAndReviewAlbum = async (ctx: Context): Promise<void> => {
       id: crypto.randomUUID(),
       artistId: newArtist.id,
       name: albumName,
-      year,
       createdAt: now,
     };
 
     await dynamodbPutNewAlbum(newAlbum);
 
-    const newAlbumReview = {
+    const newAlbumReview: AlbumReview = {
       id: crypto.randomUUID(),
       albumId: newAlbum.id,
       userId,
@@ -69,13 +76,12 @@ export const addAndReviewAlbum = async (ctx: Context): Promise<void> => {
         id: crypto.randomUUID(),
         artistId: alreadyExistingArtist.id,
         name: albumName,
-        year,
         createdAt: now,
       };
 
       await dynamodbPutNewAlbum(newAlbum);
 
-      const newAlbumReview = {
+      const newAlbumReview: AlbumReview = {
         id: crypto.randomUUID(),
         albumId: newAlbum.id,
         userId,
@@ -95,7 +101,7 @@ export const addAndReviewAlbum = async (ctx: Context): Promise<void> => {
         );
 
       if (!existingReviewForAlbum) {
-        const newAlbumReview = {
+        const newAlbumReview: AlbumReview = {
           id: crypto.randomUUID(),
           albumId: alreadyExistingAlbum.id,
           userId,

@@ -2,6 +2,8 @@ import { createSelector } from "@reduxjs/toolkit";
 import { orderBy } from "lodash-es";
 import { RootState } from "../../index";
 import { albumsAdapter } from "../albumsSlice";
+import dayjs from "dayjs";
+import { Album } from "@/types";
 
 // Get the selectors from the adapter
 const adapterSelectors = albumsAdapter.getSelectors(
@@ -18,9 +20,11 @@ export const selectAlbumTotal = adapterSelectors.selectTotal;
 export const selectRecentReleasedAlbums = createSelector(
   [selectAllAlbums],
   (albums) => {
-    const currentYear = new Date().getFullYear().toString();
+    const threeMonthsAgo = dayjs().subtract(3, "month").format("YYYY-MM-DD");
 
-    const recentAlbums = albums.filter((album) => album.year === currentYear);
+    const recentAlbums = albums.filter(
+      (album: Album) => album.releaseDate >= threeMonthsAgo,
+    );
 
     return orderBy(recentAlbums, "reviewScore", "desc");
   },

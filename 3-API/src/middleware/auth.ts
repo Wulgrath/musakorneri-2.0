@@ -29,11 +29,12 @@ export async function authMiddleware(ctx: Context, next: Next) {
     ctx.state.userId = payload.sub;
     ctx.state.email = payload.email;
     ctx.state.username = payload.username;
-
-    await next();
   } catch (error: any) {
     console.log("Token verification failed:", error.message);
     ctx.status = 401;
     ctx.body = { error: "Invalid token" };
+    return;
   }
+
+  await next();
 }

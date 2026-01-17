@@ -1,5 +1,5 @@
-import * as cdk from "aws-cdk-lib/core";
 import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
+import * as cdk from "aws-cdk-lib/core";
 import { Construct } from "constructs";
 
 export class DynamodbStack extends cdk.Stack {
@@ -7,6 +7,7 @@ export class DynamodbStack extends cdk.Stack {
   public readonly artistsTable: dynamodb.Table;
   public readonly usersTable: dynamodb.Table;
   public readonly albumReviewsTable: dynamodb.Table;
+  public readonly aotyTable: dynamodb.Table;
 
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
@@ -93,6 +94,19 @@ export class DynamodbStack extends cdk.Stack {
       partitionKey: { name: "artistId", type: dynamodb.AttributeType.STRING },
     });
 
+    this.aotyTable = new dynamodb.Table(this, "musakorneri-aoty-table", {
+      tableName: "musakorneri-aoty-table",
+      partitionKey: { name: "userId", type: dynamodb.AttributeType.STRING },
+      sortKey: { name: "year", type: dynamodb.AttributeType.STRING },
+      removalPolicy: cdk.RemovalPolicy.RETAIN,
+      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+      deletionProtection: true,
+      pointInTimeRecoverySpecification: {
+        pointInTimeRecoveryEnabled: true,
+      },
+      stream: dynamodb.StreamViewType.NEW_AND_OLD_IMAGES,
+    });
+
     new cdk.CfnOutput(this, "AlbumsTableArn", {
       value: this.albumsTable.tableArn,
       exportName: "MusakorneriAlbumsTableArn",
@@ -116,6 +130,11 @@ export class DynamodbStack extends cdk.Stack {
     new cdk.CfnOutput(this, "AlbumReviewsTable", {
       value: this.albumReviewsTable.tableArn,
       exportName: "MusakorneriAlbumReviewsTableArn",
+    });
+
+    new cdk.CfnOutput(this, "AotyTable", {
+      value: this.aotyTable.tableArn,
+      exportName: "MusakorneriAotyTableArn",
     });
   }
 }

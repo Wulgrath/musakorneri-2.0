@@ -23,27 +23,3 @@ export const getAllAlbums = async (ctx: Context): Promise<void> => {
     ctx.body = { error: "Failed to fetch albums" };
   }
 };
-
-export const getAlbumById = async (ctx: Context): Promise<void> => {
-  try {
-    const { id } = ctx.params;
-    const command = new GetCommand({
-      TableName: TABLE_NAME,
-      Key: { id },
-    });
-
-    const response = await client.send(command);
-
-    if (!response.Item) {
-      ctx.status = 404;
-      ctx.body = { error: "Album not found" };
-      return;
-    }
-
-    ctx.body = response.Item;
-  } catch (error) {
-    console.error("Error fetching album:", error);
-    ctx.status = 500;
-    ctx.body = { error: "Failed to fetch album" };
-  }
-};

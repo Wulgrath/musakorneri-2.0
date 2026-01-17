@@ -4,6 +4,7 @@ export interface Album {
   artistId: string;
   reviewScore?: number;
   reviewCount?: number;
+  releaseDate: string;
   year?: string;
 }
 
@@ -57,4 +58,11 @@ export interface ReviewAlbumRequest {
   albumName: string;
   score: number;
   reviewText?: string;
+}
+
+export interface AotyItem {
+  userId: string;
+  year: string;
+  albumId: string;
+  artistId?: string;
 }
