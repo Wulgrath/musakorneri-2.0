@@ -4,7 +4,7 @@ export interface Album {
   artistId: string;
   reviewScore?: number;
   reviewCount?: number;
-  year?: number;
+  year?: string;
 }
 
 export interface Artist {

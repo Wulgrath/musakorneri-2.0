@@ -2,7 +2,7 @@ export interface Album {
   id: string;
   name: string;
   artistId: string;
-  year?: number;
+  year?: string;
   createdAt: string;
 }
 

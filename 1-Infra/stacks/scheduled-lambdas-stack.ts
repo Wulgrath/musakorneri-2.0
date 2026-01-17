@@ -52,11 +52,16 @@ export class MusakorneriScheduledLambdasStack extends cdk.Stack {
     filesBucket.grantWrite(processMusicBrainzQueueLambda);
 
     // Grant DynamoDB permissions
-    const albumsTable = dynamodb.Table.fromTableArn(
-      this,
-      "ImportedAlbumsTable",
-      cdk.Fn.importValue("MusakorneriAlbumsTableArn")
+    processMusicBrainzQueueLambda.addToRolePolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: [
+          "dynamodb:UpdateItem",
+          "dynamodb:GetItem",
+          "dynamodb:PutItem"
+        ],
+        resources: [cdk.Fn.importValue("MusakorneriAlbumsTableArn")]
+      })
     );
-    albumsTable.grantWriteData(processMusicBrainzQueueLambda);
   }
 }

@@ -2,13 +2,13 @@ import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { Context, SQSEvent } from "aws-lambda";
 import { s3Client } from "../instances/aws";
 import { dynamodbUpdateAlbumMusicBrainzReleaseId } from "../services/dynamodb/albums/dynamodb-update-album-music-brainz-release-id.service";
-import { dynamodbUpdateAlbumYear } from "../services/dynamodb/albums/dynamodb-update-album-year.service";
+import { dynamodbUpdateAlbumReleaseDateInformation } from "../services/dynamodb/albums/dynamodb-update-album-release-date-information.service";
 
 const FILES_BUCKET_NAME = process.env.FILES_BUCKET_NAME;
 
 export const handler = async (
   event: SQSEvent,
-  context: Context
+  context: Context,
 ): Promise<void> => {
   try {
     for (const record of event.Records) {
@@ -18,7 +18,7 @@ export const handler = async (
 
       const albumData = await fetchAlbumDataFromMusicBrainz(
         payload.albumName,
-        payload.artistName
+        payload.artistName,
       );
 
       if (albumData) {
@@ -27,10 +27,10 @@ export const handler = async (
         // Update album with MusicBrainz release ID
         await dynamodbUpdateAlbumMusicBrainzReleaseId(
           payload.albumId,
-          albumData.id
+          albumData.id,
         );
 
-        // Update year from earliest release date
+        // Update year and release date from earliest release date
         if (albumData.allReleases?.length > 0) {
           const earliestRelease = albumData.allReleases
             .filter((r: any) => r.date)
@@ -38,14 +38,18 @@ export const handler = async (
 
           if (earliestRelease?.date) {
             const year = earliestRelease.date.split("-")[0];
-            await dynamodbUpdateAlbumYear(payload.albumId, year);
+            await dynamodbUpdateAlbumReleaseDateInformation(
+              payload.albumId,
+              earliestRelease.date,
+              year,
+            );
           }
         }
 
         // Fetch and store cover art
         const coverArtUrl = await fetchAndStoreCoverArt(
           albumData.id,
-          payload.albumId
+          payload.albumId,
         );
         if (coverArtUrl) {
           console.log("Stored cover art at:", coverArtUrl);
@@ -65,7 +69,7 @@ export const handler = async (
 const fetchAlbumDataFromMusicBrainz = async (
   albumName: string,
   artistName: string,
-  retries = 5
+  retries = 5,
 ) => {
   for (let attempt = 1; attempt <= retries; attempt++) {
     try {
@@ -73,7 +77,7 @@ const fetchAlbumDataFromMusicBrainz = async (
         artistName ? ` AND artist:"${artistName}"` : ""
       }`;
       const url = `https://musicbrainz.org/ws/2/release/?query=${encodeURIComponent(
-        query
+        query,
       )}&fmt=json&limit=20`;
 
       const response = await fetch(url, {
@@ -116,7 +120,9 @@ const fetchAlbumDataFromMusicBrainz = async (
             id: releaseWithCoverArt.release.id,
             title: releaseWithCoverArt.release.title,
             date: releaseWithCoverArt.release.date,
-            type: releaseWithCoverArt.release["release-group"]?.["primary-type"],
+            type: releaseWithCoverArt.release["release-group"]?.[
+              "primary-type"
+            ],
           });
 
           return {
@@ -148,7 +154,7 @@ const fetchAlbumDataFromMusicBrainz = async (
       return null;
     } catch (error) {
       console.error(`MusicBrainz fetch attempt ${attempt} failed:`, error);
-      
+
       if (attempt === retries) {
         console.error("Max retries exceeded for MusicBrainz fetch");
         return null;
@@ -174,7 +180,7 @@ const checkCoverArtExists = async (releaseId: string): Promise<boolean> => {
         headers: {
           "User-Agent": "Musakorneri.in/0.1 (wulgrath@gmail.com)",
         },
-      }
+      },
     );
     return response.ok;
   } catch (error) {
@@ -204,7 +210,7 @@ const fetchAndStoreCoverArt = async (releaseId: string, albumId: string) => {
 
     const metadata: any = await metadataResponse.json();
     const frontCover = metadata.images?.find(
-      (img: any) => img.front === true || img.types?.includes("Front")
+      (img: any) => img.front === true || img.types?.includes("Front"),
     );
 
     if (!frontCover) {
@@ -223,7 +229,7 @@ const fetchAndStoreCoverArt = async (releaseId: string, albumId: string) => {
         Key: fullKey,
         Body: new Uint8Array(fullImageBuffer),
         ContentType: contentType,
-      })
+      }),
     );
 
     // Store thumbnail (250px)
@@ -237,7 +243,7 @@ const fetchAndStoreCoverArt = async (releaseId: string, albumId: string) => {
           Key: thumbKey,
           Body: new Uint8Array(thumbBuffer),
           ContentType: contentType,
-        })
+        }),
       );
     }
 
@@ -250,7 +256,7 @@ const fetchAndStoreCoverArt = async (releaseId: string, albumId: string) => {
 
 const fetchWithRetry = async (
   url: string,
-  maxRetries = 3
+  maxRetries = 3,
 ): Promise<ArrayBuffer> => {
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {

@@ -20,7 +20,7 @@ export const RecentAlbumReviews = () => {
       {isLoading ? (
         <div>Loading...</div>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className="space-y-4">
           {albumReviews.map((review) => (
             <ReviewCard key={review.id} review={review} />
           ))}

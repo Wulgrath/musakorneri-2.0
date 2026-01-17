@@ -9,13 +9,11 @@ import { AlbumsListItem } from "./AlbumsListItem/AlbumsListItem";
 
 export const AlbumsList = () => {
   const selectedYear = useSelector(
-    (state: RootState) => state.albumCharts.selectedYear
+    (state: RootState) => state.albumCharts.selectedYear,
   );
   const { data, isLoading, error } = useGetAlbumChartsDataQuery(selectedYear);
 
   const myAlbumReviews = useSelector(selectCurrentUserAlbumReviews);
-
-  console.log("myAlbumReviews", myAlbumReviews);
 
   const albums = data?.albums;
   const sortedAlbums = albums ? orderBy(albums, ["reviewScore"], ["desc"]) : [];
@@ -30,7 +28,7 @@ export const AlbumsList = () => {
       {sortedAlbums.map((album) => {
         const artist = artists?.find((a) => a.id === album.artistId);
         const userReview = myAlbumReviews.find(
-          (review) => review.albumId === album.id
+          (review) => review.albumId === album.id,
         );
 
         return (

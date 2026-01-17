@@ -1,5 +1,6 @@
 import { Album, AlbumReview, Artist } from "@/types";
 import { api } from "../api";
+import { addArtists } from "../artists/artistsSlice";
 
 interface ArtistData {
   artist: Artist;
@@ -16,29 +17,17 @@ export const albumsApi = api.injectEndpoints({
         { type: "Album", id: "LIST" },
       ],
     }),
-    // getAlbumById: builder.query<Album, string>({
-    //   query: (id) => `/albums/${id}`,
-    //   providesTags: (result, error, id) => [{ type: "Album", id }],
-    // }),
-    // createAlbum: builder.mutation<Album, Partial<Album>>({
-    //   query: (album) => ({
-    //     url: "/albums",
-    //     method: "POST",
-    //     body: album,
-    //   }),
-    //   invalidatesTags: ["Album"],
-    // }),
-    // getAlbumChartsData: builder.query<AlbumChartsResponse, string>({
-    //   query: (year) => `/albums/album-chart-data/${year}`,
-    //   providesTags: ["Album", "Artist"],
-    //   onQueryStarted: async (arg, { dispatch, queryFulfilled }) => {
-    //     try {
-    //       const { data } = await queryFulfilled;
-    //       if (data.artists) dispatch(addArtists(data.artists));
-    //     } catch {}
-    //   },
-    // }),
+    getArtistsBaseData: builder.query<Artist[], void>({
+      query: () => `artists/artists-base-data`,
+      onQueryStarted: async (arg, { dispatch, queryFulfilled }) => {
+        try {
+          const { data } = await queryFulfilled;
+          if (data) dispatch(addArtists(data));
+        } catch {}
+      },
+    }),
   }),
 });
 
-export const { useGetArtistDataByIdQuery } = albumsApi;
+export const { useGetArtistDataByIdQuery, useGetArtistsBaseDataQuery } =
+  albumsApi;

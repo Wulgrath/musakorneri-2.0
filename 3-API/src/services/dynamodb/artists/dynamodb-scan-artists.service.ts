@@ -7,6 +7,10 @@ export const dynamodbScanArtists = async () =>
     .send(
       new ScanCommand({
         TableName: MUSAKORNERI_ARTISTS_TABLE,
-      })
+        ProjectionExpression: "id, #name",
+        ExpressionAttributeNames: {
+          "#name": "name",
+        },
+      }),
     )
     .then((res) => res.Items);

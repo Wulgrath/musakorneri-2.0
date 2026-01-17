@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { MobileSidebar } from "./MobileSidebar/MobileSidebar";
+import { SearchInput } from "./SearchInput/SearchInput";
 
 export function TopToolbar() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -17,17 +18,20 @@ export function TopToolbar() {
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setDropdownOpen(false);
       }
     };
 
     if (dropdownOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener("mousedown", handleClickOutside);
     }
 
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [dropdownOpen]);
 
@@ -66,6 +70,8 @@ export function TopToolbar() {
           </div>
 
           <div className="flex items-center space-x-4">
+            <SearchInput></SearchInput>
+
             {/* Desktop Auth */}
             <div className="hidden md:block">
               {isLoggedIn ? (

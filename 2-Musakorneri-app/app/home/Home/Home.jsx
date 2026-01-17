@@ -1,16 +1,15 @@
 "use client";
 
 import { RecentAlbumReviews } from "./RecentAlbumReviews/RecentAlbumReviews";
+import { TopRecentReleases } from "./TopRecentReleases/TopRecentReleases";
 
 export const Home = () => {
-  const currentYear = new Date().getFullYear();
-  const topAlbumsThisYear = []
-    .filter((album) => album.year === currentYear)
-    .slice(0, 6);
-
   return (
     <div className="p-3 space-y-8">
-      <RecentAlbumReviews />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <RecentAlbumReviews />
+        <TopRecentReleases />
+      </div>
 
       {/* <section>
         <h2 className="text-2xl font-semibold mb-4">

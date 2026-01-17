@@ -1,13 +1,6 @@
-import { AlbumChartsResponse } from "@/types";
+import { Album, AlbumChartsResponse } from "@/types";
 import { api } from "../api";
 import { addArtists } from "../artists/artistsSlice";
-
-export interface Album {
-  id: string;
-  title: string;
-  artist: string;
-  year?: number;
-}
 
 export const albumsApi = api.injectEndpoints({
   endpoints: (builder) => ({
