@@ -104,8 +104,8 @@ export const SearchInput = () => {
 
       {/* Mobile Search Overlay */}
       {showMobileSearch && (
-        <div className="md:hidden fixed inset-0 bg-white dark:bg-gray-900 z-50 p-4">
-          <div className="flex items-center space-x-2 mb-4">
+        <div className="md:hidden fixed top-0 left-0 right-0 bottom-0 bg-white dark:bg-gray-900 z-50" style={{ marginInlineEnd: 0 }}>
+          <div className="flex items-center space-x-2 p-4 mb-4">
             <button
               onClick={() => setShowMobileSearch(false)}
               className="p-2 text-gray-900 dark:text-white"
@@ -125,8 +125,9 @@ export const SearchInput = () => {
             />
           </div>
           
-          {debouncedQuery.trim() && filteredArtists.length > 0 && (
-            <div className="space-y-2">
+          <div className="px-4">
+            {debouncedQuery.trim() && filteredArtists.length > 0 && (
+              <div className="space-y-2">
               {filteredArtists.map((artist) => (
                 <button
                   key={artist.id}
@@ -136,8 +137,9 @@ export const SearchInput = () => {
                   {artist.name}
                 </button>
               ))}
-            </div>
-          )}
+              </div>
+            )}
+          </div>
         </div>
       )}
     </>

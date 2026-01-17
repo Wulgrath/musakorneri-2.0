@@ -75,7 +75,7 @@ export const TopRecentReleases = () => {
 
   return (
     <section>
-      <h2 className="text-2xl font-semibold mb-4">Top Recent Releases</h2>
+      <h2 className="text-2xl font-semibold mb-4 hidden lg:block">Top Recent Releases</h2>
 
       {recentReleases.length > 0 ? (
         <div className="space-y-4">

@@ -15,7 +15,7 @@ export const RecentAlbumReviews = () => {
 
   return (
     <section>
-      <h2 className="text-2xl font-semibold mb-4">Recent reviews</h2>
+      <h2 className="text-2xl font-semibold mb-4 hidden lg:block">Recent reviews</h2>
 
       {isLoading ? (
         <div>Loading...</div>

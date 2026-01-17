@@ -15,7 +15,7 @@ export const ReviewCard = ({ review }) => {
 
   return (
     <div className="bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-shadow border border-gray-700 overflow-hidden relative">
-      <div className="absolute top-2 right-2 z-10">
+      <div className="absolute top-2 right-2 z-0">
         <div className="flex items-center justify-center bg-gray-700 rounded w-16 h-12">
           <span
             className="text-2xl font-bold"

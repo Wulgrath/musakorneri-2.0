@@ -1,37 +1,52 @@
 "use client";
 
+import { useState } from "react";
 import { RecentAlbumReviews } from "./RecentAlbumReviews/RecentAlbumReviews";
 import { TopRecentReleases } from "./TopRecentReleases/TopRecentReleases";
 
 export const Home = () => {
+  const [activeTab, setActiveTab] = useState("reviews");
+
   return (
-    <div className="p-3 space-y-8">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <div className="space-y-8">
+      {/* Mobile Tabs */}
+      <div className="lg:hidden sticky top-16 z-10 bg-white dark:bg-gray-900 flex border-b border-gray-200 dark:border-gray-700">
+        <button
+          onClick={() => setActiveTab("reviews")}
+          className={`flex-1 py-3 text-center font-medium transition-colors ${
+            activeTab === "reviews"
+              ? "text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400"
+              : "text-gray-500 dark:text-gray-400"
+          }`}
+        >
+          Recent Reviews
+        </button>
+        <button
+          onClick={() => setActiveTab("releases")}
+          className={`flex-1 py-3 text-center font-medium transition-colors ${
+            activeTab === "releases"
+              ? "text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400"
+              : "text-gray-500 dark:text-gray-400"
+          }`}
+        >
+          Top Recent Albums
+        </button>
+      </div>
+
+      {/* Mobile Content */}
+      <div className="p-1 lg:hidden">
+        {activeTab === "reviews" ? (
+          <RecentAlbumReviews />
+        ) : (
+          <TopRecentReleases />
+        )}
+      </div>
+
+      {/* Desktop Grid */}
+      <div className="hidden lg:grid grid-cols-2 gap-8 p-2 pt-4">
         <RecentAlbumReviews />
         <TopRecentReleases />
       </div>
-
-      {/* <section>
-        <h2 className="text-2xl font-semibold mb-4">
-          Top Albums of {currentYear}
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {topAlbumsThisYear.length > 0 ? (
-            topAlbumsThisYear.map((album) => (
-              <div
-                key={album.id}
-                className="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow"
-              >
-                <h3 className="font-semibold text-lg">{album.title}</h3>
-                <p className="text-gray-600">{album.artist}</p>
-                <p className="text-sm text-gray-500">{album.year}</p>
-              </div>
-            ))
-          ) : (
-            <p className="text-gray-500">No albums from {currentYear} yet.</p>
-          )}
-        </div>
-      </section> */}
     </div>
   );
 };
