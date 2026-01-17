@@ -9,7 +9,7 @@ import {
 export const Profile = () => {
   const { data: currentUser, isLoading } = useGetCurrentUserQuery();
   const [updateUsername, { isLoading: isUpdating }] = useUpdateUsernameMutation();
-  const [username, setUsername] = useState("");
+  const [username, setUsername] = useState(currentUser?.username || "");
 
   if (isLoading || !currentUser) {
     return (
@@ -17,10 +17,6 @@ export const Profile = () => {
         <div className="text-gray-600 dark:text-gray-400">Loading...</div>
       </div>
     );
-  }
-
-  if (username === "") {
-    setUsername(currentUser.username);
   }
 
   const handleUpdateUsername = () => {
