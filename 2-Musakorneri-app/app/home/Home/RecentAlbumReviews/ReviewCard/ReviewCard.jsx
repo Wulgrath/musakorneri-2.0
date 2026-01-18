@@ -1,4 +1,5 @@
 import { selectUserById } from "@/app/store/users/selectors/users.selectors";
+import { selectCurrentUserId } from "@/app/store/currentUser/selectors/current-user.selectors";
 import Link from "next/link";
 import { useState } from "react";
 import { useSelector } from "react-redux";
@@ -7,14 +8,24 @@ import { selectArtistById } from "../../../../store/artists/selectors/artists.se
 import Image from "next/image";
 import dayjs from "dayjs";
 import CameraAltIcon from "@mui/icons-material/CameraAlt";
+import StarIcon from "@mui/icons-material/Star";
+import StarBorderIcon from "@mui/icons-material/StarBorder";
+import { useSetAlbumAsAotyMutation } from "@/app/store/api/aotyItems.api";
 
-export const ReviewCard = ({ review }) => {
+export const ReviewCard = ({
+  review,
+  showAotyButton = false,
+  isAoty = false,
+}) => {
   const [imageError, setImageError] = useState(false);
+  const [setAlbumAsAoty] = useSetAlbumAsAotyMutation();
   const album = useSelector((state) => selectAlbumById(state, review.albumId));
   const artist = useSelector((state) =>
     selectArtistById(state, review.artistId),
   );
   const user = useSelector((state) => selectUserById(state, review.userId));
+  const currentUserId = useSelector(selectCurrentUserId);
+  const isCurrentUser = currentUserId === review.userId;
 
   const getDateDisplay = (dateString) => {
     const reviewDate = new Date(dateString);
@@ -35,15 +46,47 @@ export const ReviewCard = ({ review }) => {
   return (
     <div className="bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-shadow border border-gray-700 overflow-hidden relative">
       <div className="absolute top-2 right-2 z-0">
-        <div className="flex items-center justify-center bg-gray-700 rounded w-16 h-12">
-          <span
-            className="text-2xl font-bold"
-            style={{
-              color: `hsl(${((review.score - 1) / 4) * 120}, 50%, 45%)`,
-            }}
-          >
-            {review.score}
-          </span>
+        <div className="flex items-center gap-2">
+          {showAotyButton && (
+            isCurrentUser ? (
+              <button
+                onClick={() => setAlbumAsAoty(album?.id)}
+                className="flex flex-col items-center justify-center bg-gray-700 rounded w-12 h-12 hover:bg-gray-600 transition-colors"
+              >
+                <span className="text-xs text-gray-300 font-semibold">AOTY</span>
+                {isAoty ? (
+                  <StarIcon className="text-yellow-400" sx={{ fontSize: 20 }} />
+                ) : (
+                  <StarBorderIcon
+                    className="text-gray-400"
+                    sx={{ fontSize: 20 }}
+                  />
+                )}
+              </button>
+            ) : (
+              <div className="flex flex-col items-center justify-center bg-gray-700 rounded w-12 h-12">
+                <span className="text-xs text-gray-300 font-semibold">AOTY</span>
+                {isAoty ? (
+                  <StarIcon className="text-yellow-400" sx={{ fontSize: 20 }} />
+                ) : (
+                  <StarBorderIcon
+                    className="text-gray-400"
+                    sx={{ fontSize: 20 }}
+                  />
+                )}
+              </div>
+            )
+          )}
+          <div className="flex items-center justify-center bg-gray-700 rounded w-16 h-12">
+            <span
+              className="text-2xl font-bold"
+              style={{
+                color: `hsl(${((review.score - 1) / 4) * 120}, 50%, 45%)`,
+              }}
+            >
+              {review.score}
+            </span>
+          </div>
         </div>
       </div>
       <div className="flex items-center h-full">
@@ -79,8 +122,13 @@ export const ReviewCard = ({ review }) => {
       </div>
       <div className="absolute bottom-2 right-2">
         <span className="text-sm text-gray-400">
-          {user?.username || "Unknown User"} •{" "}
-          {getDateDisplay(review.createdAt)}
+          <Link
+            href={`/user?id=${user?.id}`}
+            className="hover:text-blue-400 transition-colors"
+          >
+            {user?.username || "Unknown User"}
+          </Link>{" "}
+          • {getDateDisplay(review.createdAt)}
         </span>
       </div>
     </div>

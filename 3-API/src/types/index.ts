@@ -57,4 +57,5 @@ export interface AotyItem {
   year: string;
   albumId: string;
   artistId?: string;
+  createdAt: string;
 }

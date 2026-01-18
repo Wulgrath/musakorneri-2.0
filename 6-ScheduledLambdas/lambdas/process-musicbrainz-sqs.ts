@@ -2,7 +2,7 @@ import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { Context, SQSEvent } from "aws-lambda";
 import { s3Client } from "../instances/aws";
 import { dynamodbUpdateAlbumMusicBrainzReleaseId } from "../services/dynamodb/albums/dynamodb-update-album-music-brainz-release-id.service";
-import { dynamodbUpdateAlbumReleaseDateInformation } from "../services/dynamodb/albums/dynamodb-update-album-release-date-information.service";
+import { dynamodbUpdateAlbumInformationfromMusicbrainzData } from "../services/dynamodb/albums/dynamodb-update-album-information-from-musicbrainz-data.service";
 
 const FILES_BUCKET_NAME = process.env.FILES_BUCKET_NAME;
 
@@ -38,10 +38,11 @@ export const handler = async (
 
           if (earliestRelease?.date) {
             const year = earliestRelease.date.split("-")[0];
-            await dynamodbUpdateAlbumReleaseDateInformation(
+            await dynamodbUpdateAlbumInformationfromMusicbrainzData(
               payload.albumId,
               earliestRelease.date,
               year,
+              albumData.title,
             );
           }
         }
@@ -71,11 +72,45 @@ const fetchAlbumDataFromMusicBrainz = async (
   artistName: string,
   retries = 5,
 ) => {
+  // Try direct search first
+  let data: any = await searchMusicBrainz(
+    albumName,
+    artistName,
+    false,
+    retries,
+  );
+
+  // If no results, try fuzzy search
+  if (!data || !data.releases || data.releases.length === 0) {
+    console.log("Direct search failed, trying fuzzy search...");
+    data = await searchMusicBrainz(albumName, artistName, true, retries);
+  }
+
+  if (data && data.releases && data.releases.length > 0) {
+    return processReleases(data.releases);
+  }
+
+  console.log("No album found for:", albumName, artistName);
+  return null;
+};
+
+const searchMusicBrainz = async (
+  albumName: string,
+  artistName: string,
+  fuzzy: boolean,
+  retries: number,
+) => {
   for (let attempt = 1; attempt <= retries; attempt++) {
     try {
-      const query = `release:"${albumName}"${
-        artistName ? ` AND artist:"${artistName}"` : ""
-      }`;
+      const albumQuery = fuzzy
+        ? `release:${albumName}~`
+        : `release:"${albumName}"`;
+      const artistQuery = artistName
+        ? fuzzy
+          ? ` AND artist:${artistName}~`
+          : ` AND artist:"${artistName}"`
+        : "";
+      const query = `${albumQuery}${artistQuery}`;
       const url = `https://musicbrainz.org/ws/2/release/?query=${encodeURIComponent(
         query,
       )}&fmt=json&limit=20`;
@@ -91,67 +126,7 @@ const fetchAlbumDataFromMusicBrainz = async (
         throw new Error(`MusicBrainz API error: ${response.status}`);
       }
 
-      const data: any = await response.json();
-
-      if (data.releases && data.releases.length > 0) {
-        // Prioritize by release type: Album > EP > others
-        const prioritizedReleases = data.releases.sort((a: any, b: any) => {
-          const getTypePriority = (release: any) => {
-            const type = release["release-group"]?.["primary-type"];
-            if (type === "Album") return 1;
-            if (type === "EP") return 2;
-            return 3;
-          };
-          return getTypePriority(a) - getTypePriority(b);
-        });
-
-        // Check first 3 prioritized releases for cover art
-        const releasesToCheck = prioritizedReleases.slice(0, 3);
-        const coverArtChecks = releasesToCheck.map(async (release: any) => ({
-          release,
-          hasCoverArt: await checkCoverArtExists(release.id),
-        }));
-
-        const results = await Promise.all(coverArtChecks);
-        const releaseWithCoverArt = results.find((r) => r.hasCoverArt);
-
-        if (releaseWithCoverArt) {
-          console.log("Found release with cover art:", {
-            id: releaseWithCoverArt.release.id,
-            title: releaseWithCoverArt.release.title,
-            date: releaseWithCoverArt.release.date,
-            type: releaseWithCoverArt.release["release-group"]?.[
-              "primary-type"
-            ],
-          });
-
-          return {
-            ...releaseWithCoverArt.release,
-            allReleases: data.releases,
-          };
-        }
-
-        // If no release has cover art, return the first prioritized one
-        const release = prioritizedReleases[0];
-        const earliestRelease = data.releases
-          .filter((r: any) => r.date)
-          .sort((a: any, b: any) => a.date.localeCompare(b.date))[0];
-
-        console.log("No cover art found, using first prioritized release:", {
-          id: release.id,
-          title: release.title,
-          date: release.date,
-          type: release["release-group"]?.["primary-type"],
-        });
-
-        return {
-          ...release,
-          allReleases: data.releases,
-        };
-      }
-
-      console.log("No album found for:", albumName, artistName);
-      return null;
+      return await response.json();
     } catch (error) {
       console.error(`MusicBrainz fetch attempt ${attempt} failed:`, error);
 
@@ -160,7 +135,6 @@ const fetchAlbumDataFromMusicBrainz = async (
         return null;
       }
 
-      // Exponential backoff with jitter: 2-3s, 4-6s, 8-12s, 16-24s, 32-48s
       const baseDelay = Math.pow(2, attempt) * 1000;
       const jitter = Math.random() * baseDelay;
       const delay = baseDelay + jitter;
@@ -169,6 +143,58 @@ const fetchAlbumDataFromMusicBrainz = async (
     }
   }
   return null;
+};
+
+const processReleases = async (releases: any[]) => {
+  // Prioritize by release type: Album > EP > others
+  const prioritizedReleases = releases.sort((a: any, b: any) => {
+    const getTypePriority = (release: any) => {
+      const type = release["release-group"]?.["primary-type"];
+      if (type === "Album") return 1;
+      if (type === "EP") return 2;
+      return 3;
+    };
+    return getTypePriority(a) - getTypePriority(b);
+  });
+
+  // Check first 3 prioritized releases for cover art
+  const releasesToCheck = prioritizedReleases.slice(0, 3);
+  const coverArtChecks = releasesToCheck.map(async (release: any) => ({
+    release,
+    hasCoverArt: await checkCoverArtExists(release.id),
+  }));
+
+  const results = await Promise.all(coverArtChecks);
+  const releaseWithCoverArt = results.find((r) => r.hasCoverArt);
+
+  if (releaseWithCoverArt) {
+    console.log("Found release with cover art:", {
+      id: releaseWithCoverArt.release.id,
+      title: releaseWithCoverArt.release.title,
+      date: releaseWithCoverArt.release.date,
+      type: releaseWithCoverArt.release["release-group"]?.["primary-type"],
+    });
+
+    return {
+      ...releaseWithCoverArt.release,
+      allReleases: releases,
+    };
+  }
+
+  // If no release has cover art, return the first prioritized one
+  const release = prioritizedReleases[0];
+
+  console.log("No cover art found, using first prioritized release:", {
+    id: release.id,
+    title: release.title,
+    date: release.date,
+    type: release["release-group"]?.["primary-type"],
+  });
+
+  return {
+    ...release,
+    allReleases: releases,
+  };
 };
 
 const checkCoverArtExists = async (releaseId: string): Promise<boolean> => {

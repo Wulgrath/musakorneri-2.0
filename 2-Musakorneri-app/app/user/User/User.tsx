@@ -1,11 +1,14 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import { useSearchParams } from "next/navigation";
-import { useGetUserPageDataQuery } from "../../store/api/users.api";
 import { ALBUM_SCORE_OPTIONS } from "@/app/constants/album-score-options";
 import { ReviewCard } from "@/app/home/Home/RecentAlbumReviews/ReviewCard/ReviewCard";
+import { RootState } from "@/app/store";
+import { selectAotyItemsByUserId } from "@/app/store/aotyItems/selectors/aoty-items.selectors";
 import { orderBy } from "lodash-es";
+import { useSearchParams } from "next/navigation";
+import { useMemo, useState } from "react";
+import { useSelector } from "react-redux";
+import { useGetUserPageDataQuery } from "../../store/api/users.api";
 
 export const User = () => {
   const searchParams = useSearchParams();
@@ -17,7 +20,9 @@ export const User = () => {
     userId as string,
     { skip: !userId },
   );
-
+  const userAotyItems = useSelector((state: RootState) =>
+    selectAotyItemsByUserId(state, userId),
+  );
   const filteredReviews = useMemo(() => {
     if (!data?.albumReviews) return [];
 
@@ -27,7 +32,7 @@ export const User = () => {
       const scoreMatch =
         !scoreFilter ||
         (scoreFilter === "AOTY"
-          ? review.score === 5
+          ? userAotyItems.some((item) => item.albumId === review.albumId)
           : review.score.toString() === scoreFilter);
 
       return yearMatch && scoreMatch;
@@ -38,7 +43,7 @@ export const User = () => {
     }
 
     return filtered;
-  }, [data, yearFilter, scoreFilter]);
+  }, [data, yearFilter, scoreFilter, userAotyItems]);
 
   const availableYears = useMemo(() => {
     if (!data?.albums) return [];
@@ -112,9 +117,19 @@ export const User = () => {
       </h2>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {filteredReviews.map((review) => (
-          <ReviewCard key={review.id} review={review} />
-        ))}
+        {filteredReviews.map((review) => {
+          const isAoty = userAotyItems.some(
+            (item) => item.albumId === review.albumId,
+          );
+          return (
+            <ReviewCard
+              key={review.id}
+              review={review}
+              showAotyButton
+              isAoty={isAoty}
+            />
+          );
+        })}
       </div>
     </div>
   );

@@ -1,5 +1,6 @@
+import { selectCurrentUserId } from "@/app/store/currentUser/selectors/current-user.selectors";
 import Link from "next/link";
-import React from "react";
+import { useSelector } from "react-redux";
 
 interface MobileSidebarProps {
   setSidebarOpen: (open: boolean) => void;
@@ -12,6 +13,8 @@ export const MobileSidebar = ({
   isLoggedIn,
   handleLogout,
 }: MobileSidebarProps) => {
+  const currentUserId = useSelector(selectCurrentUserId);
+
   return (
     <div className="fixed inset-0 z-50 md:hidden">
       <div
@@ -70,12 +73,20 @@ export const MobileSidebar = ({
           {isLoggedIn ? (
             <>
               <Link
+                href={`/user/?id=${currentUserId}`}
+                className="block py-2 text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded px-2"
+                onClick={() => setSidebarOpen(false)}
+              >
+                My Reviews
+              </Link>
+              <Link
                 href="/profile"
                 className="block py-2 text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded px-2"
                 onClick={() => setSidebarOpen(false)}
               >
                 Profile
               </Link>
+
               <button
                 onClick={() => {
                   handleLogout();

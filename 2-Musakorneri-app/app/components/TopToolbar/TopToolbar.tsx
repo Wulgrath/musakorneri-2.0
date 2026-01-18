@@ -1,10 +1,12 @@
 "use client";
 
+import { selectCurrentUserId } from "@/app/store/currentUser/selectors/current-user.selectors";
+import { AccountCircle, ArrowDropDown } from "@mui/icons-material";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import { useSelector } from "react-redux";
 import { MobileSidebar } from "./MobileSidebar/MobileSidebar";
 import { SearchInput } from "./SearchInput/SearchInput";
-import { AccountCircle, ArrowDropDown } from "@mui/icons-material";
 
 export function TopToolbar() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -42,6 +44,8 @@ export function TopToolbar() {
     setIsLoggedIn(false);
     window.location.href = "/";
   };
+
+  const currentUserId = useSelector(selectCurrentUserId);
 
   return (
     <>
@@ -87,11 +91,18 @@ export function TopToolbar() {
                   {dropdownOpen && (
                     <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-md shadow-lg z-50">
                       <Link
+                        href={`/user/?id=${currentUserId}`}
+                        className="block px-4 py-2 text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                      >
+                        My Reviews
+                      </Link>
+                      <Link
                         href="/profile"
                         className="block px-4 py-2 text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
                       >
                         Profile
                       </Link>
+
                       <button
                         onClick={handleLogout}
                         className="block w-full text-left px-4 py-2 text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
