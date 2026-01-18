@@ -11,8 +11,9 @@ export const usersSlice = createSlice({
   reducers: {
     setUsers: usersAdapter.setAll,
     addUsers: usersAdapter.addMany,
+    addUser: usersAdapter.addOne,
   },
 });
 
-export const { setUsers, addUsers } = usersSlice.actions;
+export const { setUsers, addUsers, addUser } = usersSlice.actions;
 export default usersSlice.reducer;

@@ -1,5 +1,15 @@
 # Musakorneri Project Guidelines
 
+## Array Operations
+- Use lodash functions for array operations (sorting, filtering, grouping, etc.)
+- Import specific functions: `import { orderBy, groupBy, uniq } from "lodash-es"`
+- Prefer `orderBy` over native `sort()` for complex sorting
+
+## Score Handling
+- Always use ALBUM_SCORE_OPTIONS from `@/app/constants/album-score-options` when handling scores
+- Use the options array for dropdowns, validation, and score-related UI elements
+- Access score values via `ALBUM_SCORE_OPTIONS.map(option => option.value)`
+
 ## Framework & Libraries
 - Next.js 16 with App Router
 - React 19

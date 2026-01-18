@@ -2,6 +2,8 @@ import toast from "react-hot-toast";
 import { api } from "../api";
 import { setCurrentUser } from "../currentUser/currentUserSlice";
 import { Album, AlbumReview, AotyItem, User } from "@/types";
+import { setAlbums } from "../albums/albumsSlice";
+import { addUser, setUsers } from "../users/usersSlice";
 
 interface UserPageData {
   user: User;
@@ -42,7 +44,8 @@ export const usersApi = api.injectEndpoints({
       onQueryStarted: async (arg, { dispatch, queryFulfilled }) => {
         try {
           const { data } = await queryFulfilled;
-          // dispatch(setCurrentUser(data));
+          dispatch(setAlbums(data.albums));
+          dispatch(addUser(data.user));
         } catch {}
       },
     }),

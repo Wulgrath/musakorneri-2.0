@@ -7,17 +7,17 @@ import Link from "next/link";
 import Image from "next/image";
 import { ALBUM_SCORE_OPTIONS } from "@/app/constants/album-score-options";
 
-interface AlbumsListItemProps {
+interface ArtistAlbumItemProps {
   album: Album;
   artist?: Artist;
   userReview?: AlbumReview;
 }
 
-export const AlbumsListItem = ({
+export const ArtistAlbumItem = ({
   album,
   artist,
   userReview,
-}: AlbumsListItemProps) => {
+}: ArtistAlbumItemProps) => {
   const [imageError, setImageError] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const [updateReview] = useUpdateAlbumReviewMutation();
@@ -47,7 +47,7 @@ export const AlbumsListItem = ({
     <div className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-visible relative">
       <div className="flex items-start h-full px-1 py-1">
         <div
-          className={`w-26 h-26 sm:w-28 sm:h-28 flex-shrink-0 flex items-center justify-center ${
+          className={`w-26 h-26 sm:w-28 sm:h-28 flex-shrink-0  flex items-center justify-center ${
             imageError ? "border border-gray-300 dark:border-gray-600" : ""
           }`}
         >
@@ -65,24 +65,16 @@ export const AlbumsListItem = ({
             </span>
           )}
         </div>
-        <div className="px-2 sm:px-2 flex flex-col justify-start min-w-0 flex-1">
+        <div className="px-2 sm:py-1 sm:px-2 flex flex-col justify-start min-w-0 flex-1">
           <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white truncate">
             {album.name}
-            {album.year && (
-              <span className="text-xs sm:text-sm text-gray-500 dark:text-gray-500 font-normal ml-2">
-                ({album.year})
-              </span>
-            )}
           </h3>
+          {album.year && (
+            <p className="text-sm text-gray-500 dark:text-gray-400 -mt-1">
+              {album.year}
+            </p>
+          )}
 
-          <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 truncate -mt-1">
-            <Link
-              href={`/artist?id=${artist?.id}`}
-              className="hover:text-blue-500 dark:hover:text-blue-400 transition-colors"
-            >
-              {artist?.name}
-            </Link>
-          </p>
           {album?.reviewScore && (
             <div className="flex flex-col items-start justify-center mt-1">
               <div className="flex flex-col items-center justify-center bg-gray-100 dark:bg-gray-700 rounded px-2 py-1">

@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { useSelector } from "react-redux";
 import { selectCurrentUserAlbumReviews } from "@/app/store/reviews/selectors/album-reviews.selectors";
 import { AlbumsListItem } from "@/app/album-charts/AlbumCharts/AlbumsList/AlbumsListItem/AlbumsListItem";
+import { ArtistAlbumItem } from "./ArtistAlbumItem/ArtistAlbumItem";
 import { orderBy } from "lodash-es";
 
 export const Artist = () => {
@@ -49,7 +50,7 @@ export const Artist = () => {
           );
 
           return (
-            <AlbumsListItem
+            <ArtistAlbumItem
               key={album.id}
               album={album}
               artist={artist}
